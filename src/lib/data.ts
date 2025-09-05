@@ -3,6 +3,7 @@ import { Stethoscope, HeartPulse, Brain, Bone, Baby, Eye, Search, Calendar, Mess
 
 export const doctors = [
   {
+    id: '1',
     name: 'Dr. Ananya Sharma',
     specialty: 'Cardiologist',
     location: 'Mumbai, India',
@@ -13,6 +14,7 @@ export const doctors = [
     dataAiHint: 'doctor portrait',
   },
   {
+    id: '2',
     name: 'Dr. Vikram Singh',
     specialty: 'Neurologist',
     location: 'Delhi, India',
@@ -23,6 +25,7 @@ export const doctors = [
     dataAiHint: 'doctor smiling',
   },
   {
+    id: '3',
     name: 'Dr. Priya Patel',
     specialty: 'Orthopedic Surgeon',
     location: 'Bangalore, India',
@@ -33,6 +36,7 @@ export const doctors = [
     dataAiHint: 'female doctor',
   },
   {
+    id: '4',
     name: 'Dr. Rohan Joshi',
     specialty: 'Pediatrician',
     location: 'Pune, India',
@@ -43,6 +47,7 @@ export const doctors = [
     dataAiHint: 'male doctor',
   },
   {
+    id: '5',
     name: 'Dr. Sameera Khan',
     specialty: 'General Physician',
     location: 'Chennai, India',
@@ -53,6 +58,7 @@ export const doctors = [
     dataAiHint: 'physician portrait',
   },
   {
+    id: '6',
     name: 'Dr. Arjun Reddy',
     specialty: 'Ophthalmologist',
     location: 'Hyderabad, India',

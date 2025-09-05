@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Search, MapPin, ChevronDown, Star, Video, Hospital } from "lucide-react";
 import { doctors, consultationTypes } from "@/lib/data";
 import { Button } from "@/components/ui/button";
@@ -57,8 +58,8 @@ export default function DoctorSearchSection() {
       </Card>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filteredDoctors.map((doctor, index) => (
-          <Card key={index} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+        {filteredDoctors.map((doctor) => (
+          <Card key={doctor.id} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardHeader className="p-0">
                 <div className="relative h-48 w-full">
                     <Image
@@ -95,7 +96,9 @@ export default function DoctorSearchSection() {
               
             </CardContent>
             <CardFooter className="p-6 pt-0">
-              <Button className="w-full">Book Appointment</Button>
+              <Button className="w-full" asChild>
+                <Link href={`/book/${doctor.id}`}>Book Appointment</Link>
+              </Button>
             </CardFooter>
           </Card>
         ))}
