@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, FileText, LayoutDashboard } from "lucide-react";
 import UpcomingAppointments from "@/components/patient/upcoming-appointments";
+import MedicalRecords from "@/components/patient/medical-records";
 
 
 export default function PatientDashboardPage() {
@@ -66,15 +67,7 @@ export default function PatientDashboardPage() {
            </div>
         </TabsContent>
         <TabsContent value="records">
-            <Card>
-                <CardContent className="p-6">
-                    <h3 className="font-bold text-lg">Your Medical Records</h3>
-                    <p className="text-muted-foreground mt-2">This section will contain your prescriptions, lab reports, and other health documents.</p>
-                    <div className="mt-6 text-center text-muted-foreground">
-                        No records uploaded yet.
-                    </div>
-                </CardContent>
-            </Card>
+            <MedicalRecords />
         </TabsContent>
       </Tabs>
     </div>
