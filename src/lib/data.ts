@@ -1,5 +1,5 @@
 import type { SVGProps } from 'react';
-import { Stethoscope, HeartPulse, Brain, Bone, Baby, Eye, Search, Calendar, MessageSquare, Yoga, Dumbbell, Smile, Grape, Siren, Video, Phone, Hospital } from 'lucide-react';
+import { Stethoscope, HeartPulse, Brain, Bone, Baby, Eye, Search, Calendar, MessageSquare, HeartHandshake, Dumbbell, Smile, Grape, Siren, Video, Phone, Hospital } from 'lucide-react';
 
 export const doctors = [
   {
@@ -93,7 +93,7 @@ export const howItWorksSteps = [
 
 export const wellnessItems = [
     {
-        icon: Yoga,
+        icon: HeartHandshake,
         title: 'Yoga & Mindfulness',
         description: 'Find your inner peace with guided yoga and meditation sessions.',
         image: 'https://picsum.photos/600/400?random=11',
