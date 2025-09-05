@@ -7,8 +7,8 @@ import { ArrowRight } from "lucide-react";
 
 export default function WellnessSection() {
   return (
-    <section id="wellness" className="bg-muted/40 py-20 md:py-32">
-      <div className="container">
+    <section id="wellness">
+      <div className="">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold font-headline">Wellness Zone</h2>
           <p className="mt-2 text-muted-foreground md:text-lg max-w-2xl mx-auto">
