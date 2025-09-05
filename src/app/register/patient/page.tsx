@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from 'next/navigation';
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,7 +24,9 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { User } from "lucide-react";
+import { User, Loader2 } from "lucide-react";
+import { registerPatient } from "@/app/actions";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -36,6 +39,9 @@ const formSchema = z.object({
 
 export default function PatientRegistrationPage() {
   const router = useRouter();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -47,11 +53,25 @@ export default function PatientRegistrationPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // TODO: Implement actual registration logic (e.g., call server action)
-    console.log(values);
-    // Redirect to dashboard after successful registration
-    router.push('/patient/dashboard');
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    const result = await registerPatient(values);
+    setIsLoading(false);
+
+    if (result.success) {
+      toast({
+        title: "Registration Successful!",
+        description: "Your patient account has been created.",
+      });
+      // Redirect to dashboard after successful registration
+      router.push('/patient/dashboard');
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Registration Failed",
+        description: result.error || "An unknown error occurred.",
+      });
+    }
   }
 
   return (
@@ -165,7 +185,9 @@ export default function PatientRegistrationPage() {
                 />
               </div>
               
-              <Button type="submit" className="w-full">Register</Button>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Register'}
+              </Button>
             </form>
           </Form>
         </CardContent>
