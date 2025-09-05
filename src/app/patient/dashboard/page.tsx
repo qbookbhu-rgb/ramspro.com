@@ -4,6 +4,7 @@ import WellnessSection from "@/components/home/wellness-section";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, FileText, LayoutDashboard } from "lucide-react";
+import UpcomingAppointments from "@/components/patient/upcoming-appointments";
 
 
 export default function PatientDashboardPage() {
@@ -45,12 +46,7 @@ export default function PatientDashboardPage() {
                 <HealthCard patient={patientData} />
               </div>
               <div className="lg:col-span-2 space-y-8">
-                <Card>
-                  <CardContent className="p-6">
-                    <h3 className="font-bold">Upcoming Appointments</h3>
-                    <p className="text-muted-foreground text-sm mt-2">You have no upcoming appointments.</p>
-                  </CardContent>
-                </Card>
+                <UpcomingAppointments />
                  <Card>
                   <CardContent className="p-6">
                     <h3 className="font-bold">Recent Lab Reports</h3>
@@ -64,7 +60,10 @@ export default function PatientDashboardPage() {
             </div>
         </TabsContent>
         <TabsContent value="appointments">
-          <DoctorSearchSection />
+           <div className="space-y-8">
+             <UpcomingAppointments />
+             <DoctorSearchSection />
+           </div>
         </TabsContent>
         <TabsContent value="records">
             <Card>
