@@ -1,5 +1,5 @@
 import type { SVGProps } from 'react';
-import { Stethoscope, HeartPulse, Brain, Bone, Baby, Eye, Search, Calendar, MessageSquare, HeartHandshake, Dumbbell, Smile, Grape, Siren, Video, Phone, Hospital } from 'lucide-react';
+import { Stethoscope, HeartPulse, Brain, Bone, Baby, Eye, Search, Calendar, MessageSquare, HeartHandshake, Dumbbell, Smile, Grape, Siren, Video, Phone, Hospital, User, Pill, FlaskConical, Ambulance, Sparkles } from 'lucide-react';
 
 export const doctors = [
   {
@@ -134,4 +134,13 @@ export const languages = [
     { code: 'hi', name: 'हिन्दी' },
     { code: 'bn', name: 'বাংলা' },
     { code: 'te', name: 'తెలుగు' },
+];
+
+export const registrationRoles = [
+    { name: 'Patient', href: '/register/patient', icon: User, description: 'Book appointments and manage your health.' },
+    { name: 'Doctor', href: '/register/doctor', icon: Stethoscope, description: 'Provide consultations and manage patients.' },
+    { name: 'Pharmacy', href: '/register/pharmacy', icon: Pill, description: 'Manage orders and sell medicines.' },
+    { name: 'Lab / Diagnostics', href: '/register/lab', icon: FlaskConical, description: 'Manage test bookings and reports.' },
+    { name: 'Ambulance', href: '/register/ambulance', icon: Ambulance, description: 'Provide emergency transport services.' },
+    { name: 'Wellness Expert', href: '/register/wellness', icon: Sparkles, description: 'Offer yoga, fitness, or diet plans.' },
 ];

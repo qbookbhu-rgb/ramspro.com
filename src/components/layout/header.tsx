@@ -62,10 +62,12 @@ export default function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button variant="ghost" size="icon">
-            <UserCircle className="h-[1.2rem] w-[1.2rem]" />
-            <span className="sr-only">User Profile</span>
+          <Button asChild>
+            <Link href="/register">Register</Link>
           </Button>
+          
+          <Button variant="ghost" className="hidden sm:inline-flex">Login</Button>
+
 
           <Button
             variant="ghost"
@@ -91,6 +93,7 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
+            <Button variant="outline" className="w-full">Login</Button>
           </nav>
         </div>
       )}
