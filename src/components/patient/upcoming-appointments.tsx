@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar, Clock, Hospital, User, Video } from "lucide-react";
@@ -20,16 +21,21 @@ interface Appointment {
 }
 
 export default function UpcomingAppointments() {
+    const { user, loading: authLoading } = useAuth();
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Placeholder for the logged-in patient's ID.
-        const patientId = "user-placeholder-id"; 
+        if (!user || authLoading) {
+            // If user is not logged in or auth is still loading, don't fetch.
+            // You might want to clear appointments if user logs out.
+            if(!authLoading) setIsLoading(false);
+            return;
+        }
 
         const q = query(
             collection(db, "appointments"), 
-            where("patientId", "==", patientId),
+            where("patientId", "==", user.uid),
             orderBy("createdAt", "desc")
         );
 
@@ -46,7 +52,7 @@ export default function UpcomingAppointments() {
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [user, authLoading]);
 
     return (
         <Card>
@@ -55,7 +61,7 @@ export default function UpcomingAppointments() {
                 <CardDescription>Here are your scheduled appointments.</CardDescription>
             </CardHeader>
             <CardContent>
-                {isLoading ? (
+                {isLoading || authLoading ? (
                     <div className="space-y-4">
                         <Skeleton className="h-24 w-full" />
                         <Skeleton className="h-24 w-full" />
@@ -92,3 +98,5 @@ export default function UpcomingAppointments() {
         </Card>
     );
 }
+
+    

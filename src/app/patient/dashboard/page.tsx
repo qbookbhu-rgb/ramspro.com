@@ -1,22 +1,86 @@
+
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { useAuth } from "@/hooks/use-auth";
 import { HealthCard } from "@/components/patient/health-card";
 import DoctorSearchSection from "@/components/home/doctor-search-section";
 import WellnessSection from "@/components/home/wellness-section";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, FileText, LayoutDashboard } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar, FileText, LayoutDashboard, Loader2 } from "lucide-react";
 import UpcomingAppointments from "@/components/patient/upcoming-appointments";
 import MedicalRecords from "@/components/patient/medical-records";
 
+interface PatientData {
+  name: string;
+  patientId: string;
+  gender: string;
+  age: number;
+  bloodGroup: string; // Assuming blood group might be added later
+}
 
 export default function PatientDashboardPage() {
-  // In a real app, you'd fetch patient data here
-  const patientData = {
-    name: "John Doe",
-    patientId: "RAMS-12345678",
-    gender: "Male",
-    age: 35,
-    bloodGroup: "O+",
-  };
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+  const [patientData, setPatientData] = useState<PatientData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      router.push('/register'); // Redirect if not logged in
+      return;
+    }
+
+    const fetchPatientData = async () => {
+      try {
+        const patientDocRef = doc(db, 'patients', user.uid);
+        const patientDoc = await getDoc(patientDocRef);
+
+        if (patientDoc.exists()) {
+          const data = patientDoc.data();
+          setPatientData({
+            name: data.name,
+            patientId: data.patientId,
+            gender: data.gender,
+            age: data.age,
+            bloodGroup: data.bloodGroup || 'N/A', // Handle optional field
+          });
+        } else {
+          console.error("No patient data found for this user.");
+          // Handle case where user is authenticated but has no patient profile
+          router.push('/register/patient');
+        }
+      } catch (error) {
+        console.error("Error fetching patient data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPatientData();
+  }, [user, authLoading, router]);
+
+  if (loading || authLoading) {
+    return (
+      <div className="container py-10 flex justify-center items-center h-[60vh]">
+        <Loader2 className="h-16 w-16 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!patientData) {
+    return (
+      <div className="container py-10 text-center">
+        <h1 className="text-2xl font-bold">Could not load patient data.</h1>
+        <p className="text-muted-foreground">Please try again later or contact support.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container py-10">
@@ -73,3 +137,5 @@ export default function PatientDashboardPage() {
     </div>
   );
 }
+
+    

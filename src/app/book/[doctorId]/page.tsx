@@ -15,11 +15,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Star, MapPin, Video, Hospital, Calendar as CalendarIcon, Clock, ArrowLeft, Loader2 } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { useAuth } from "@/hooks/use-auth";
 
 
 export default function BookAppointmentPage({ params }: { params: { doctorId: string } }) {
     const { toast } = useToast();
     const router = useRouter();
+    const { user } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
 
     const doctor = doctors.find(d => d.id === params.doctorId);
@@ -35,6 +37,16 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
     const timeSlots = ["10:00 AM", "11:00 AM", "12:00 PM", "02:00 PM", "03:00 PM", "04:00 PM"];
 
     const handleBooking = async () => {
+        if (!user) {
+            toast({
+                variant: "destructive",
+                title: "Not Logged In",
+                description: "You need to be logged in to book an appointment.",
+            });
+            router.push('/register'); // Redirect to login/register
+            return;
+        }
+
         if (!selectedDate || !selectedSlot) {
             toast({
                 variant: "destructive",
@@ -47,13 +59,10 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
         setIsLoading(true);
 
         try {
-            // This is a placeholder for the logged-in patient's ID.
-            const patientId = "user-placeholder-id"; 
-
             await addDoc(collection(db, "appointments"), {
                 doctorId: doctor.id,
                 doctorName: doctor.name,
-                patientId: patientId, // Replace with actual patient ID
+                patientId: user.uid, // Use actual patient ID
                 appointmentDate: selectedDate,
                 appointmentTime: selectedSlot,
                 consultationType: selectedConsultation,
@@ -194,3 +203,5 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
         </div>
     );
 }
+
+    
