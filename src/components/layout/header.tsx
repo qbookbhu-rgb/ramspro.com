@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { languages } from "@/lib/data";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { LoginDialog } from "./login-dialog";
 
 const navLinks = [
   { href: "/#find-a-doctor", label: "Find a Doctor" },
@@ -26,6 +26,7 @@ const navLinks = [
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
   const { user, signOut, loading } = useAuth();
 
   const getInitials = (name?: string | null) => {
@@ -34,6 +35,7 @@ export default function Header() {
   }
 
   return (
+    <>
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
         <div className="mr-4 flex items-center">
@@ -101,7 +103,7 @@ export default function Header() {
               <Button asChild>
                 <Link href="/register">Register</Link>
               </Button>
-              <Button variant="ghost" className="hidden sm:inline-flex">Login</Button>
+              <Button variant="ghost" className="hidden sm:inline-flex" onClick={() => setIsLoginOpen(true)}>Login</Button>
             </>
           )}
 
@@ -130,11 +132,13 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
-            {!user && <Button variant="outline" className="w-full">Login</Button>}
+            {!user && <Button variant="outline" className="w-full" onClick={() => { setIsLoginOpen(true); setIsMenuOpen(false); }}>Login</Button>}
           </nav>
         </div>
       )}
     </header>
+    <LoginDialog isOpen={isLoginOpen} onOpenChange={setIsLoginOpen} />
+    </>
   );
 }
 

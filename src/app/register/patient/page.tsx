@@ -27,6 +27,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { User, Loader2 } from "lucide-react";
 import { registerPatient } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
+import { auth } from "@/lib/firebase";
+import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -41,6 +56,9 @@ export default function PatientRegistrationPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [showOtpDialog, setShowOtpDialog] = useState(false);
+  const [otp, setOtp] = useState("");
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -53,28 +71,85 @@ export default function PatientRegistrationPage() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-    const result = await registerPatient(values);
-    setIsLoading(false);
-
-    if (result.success) {
-      toast({
-        title: "Registration Successful!",
-        description: "Your patient account has been created.",
-      });
-      // Redirect to dashboard after successful registration
-      router.push('/patient/dashboard');
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Registration Failed",
-        description: result.error || "An unknown error occurred.",
+  const generateRecaptcha = () => {
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible',
+        'callback': (response: any) => {
+          // reCAPTCHA solved, allow signInWithPhoneNumber.
+        }
       });
     }
   }
 
+  const handleSendOtp = (phoneNumber: string) => {
+    generateRecaptcha();
+    let appVerifier = window.recaptchaVerifier;
+    signInWithPhoneNumber(auth, `+91${phoneNumber}`, appVerifier)
+      .then(confirmationResult => {
+        window.confirmationResult = confirmationResult;
+        setShowOtpDialog(true);
+        toast({
+          title: "OTP Sent!",
+          description: "Please check your phone for the OTP.",
+        });
+      }).catch(error => {
+        console.error("SMS not sent", error);
+        toast({
+          variant: "destructive",
+          title: "OTP Failed",
+          description: "Could not send OTP. Please try again.",
+        });
+      })
+  }
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    handleSendOtp(values.mobile)
+    // The rest of the logic is now in handleOtpSubmit
+    setIsLoading(false);
+  }
+
+  async function handleOtpSubmit() {
+    setIsLoading(true);
+    let confirmationResult = window.confirmationResult;
+    confirmationResult.confirm(otp).then(async (result: any) => {
+        // User signed in successfully.
+        const user = result.user;
+        
+        const registrationData = form.getValues();
+        const finalResult = await registerPatient(registrationData);
+
+        if (finalResult.success) {
+          toast({
+            title: "Registration Successful!",
+            description: "Your patient account has been created.",
+          });
+          router.push('/patient/dashboard');
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Registration Failed",
+            description: finalResult.error || "An unknown error occurred.",
+          });
+        }
+
+    }).catch((error: any) => {
+        // User couldn't sign in (bad verification code?)
+        console.error("OTP verification failed", error);
+        toast({
+          variant: "destructive",
+          title: "OTP Invalid",
+          description: "The OTP you entered is incorrect.",
+        });
+    }).finally(() => {
+        setIsLoading(false);
+        setShowOtpDialog(false);
+    });
+  }
+
   return (
+    <>
     <div className="container py-20 flex justify-center">
       <Card className="w-full max-w-2xl shadow-xl">
         <CardHeader>
@@ -186,12 +261,41 @@ export default function PatientRegistrationPage() {
               </div>
               
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Register'}
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Send OTP'}
               </Button>
             </form>
           </Form>
         </CardContent>
       </Card>
     </div>
+    <div id="recaptcha-container"></div>
+    <Dialog open={showOtpDialog} onOpenChange={setShowOtpDialog}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Enter OTP</DialogTitle>
+          <DialogDescription>
+            We've sent a 6-digit OTP to your mobile number. Please enter it below.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col items-center gap-4">
+          <InputOTP maxLength={6} value={otp} onChange={setOtp}>
+            <InputOTPGroup>
+              <InputOTPSlot index={0} />
+              <InputOTPSlot index={1} />
+              <InputOTPSlot index={2} />
+              <InputOTPSlot index={3} />
+              <InputOTPSlot index={4} />
+              <InputOTPSlot index={5} />
+            </InputOTPGroup>
+          </InputOTP>
+          <Button onClick={handleOtpSubmit} disabled={isLoading || otp.length < 6} className="w-full">
+             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Verify & Register'}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
+
+    

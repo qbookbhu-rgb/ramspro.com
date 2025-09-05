@@ -1,4 +1,3 @@
-
 import { initializeApp, getApp, getApps } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
@@ -17,6 +16,14 @@ const firebaseConfig = {
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 const auth = getAuth(app);
+
+// Extend the Window interface
+declare global {
+  interface Window {
+    recaptchaVerifier: any;
+    confirmationResult: any;
+  }
+}
 
 export { app, db, auth };
 
