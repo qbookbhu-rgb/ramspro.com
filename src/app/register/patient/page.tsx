@@ -83,6 +83,7 @@ export default function PatientRegistrationPage() {
   }
 
   const handleSendOtp = (phoneNumber: string) => {
+    setIsLoading(true);
     generateRecaptcha();
     let appVerifier = window.recaptchaVerifier;
     signInWithPhoneNumber(auth, `+91${phoneNumber}`, appVerifier)
@@ -100,14 +101,14 @@ export default function PatientRegistrationPage() {
           title: "OTP Failed",
           description: "Could not send OTP. Please try again.",
         });
+      }).finally(() => {
+        setIsLoading(false);
       })
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
     handleSendOtp(values.mobile)
     // The rest of the logic is now in handleOtpSubmit
-    setIsLoading(false);
   }
 
   async function handleOtpSubmit() {
@@ -261,7 +262,7 @@ export default function PatientRegistrationPage() {
               </div>
               
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Send OTP'}
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Send OTP & Register'}
               </Button>
             </form>
           </Form>
@@ -297,5 +298,3 @@ export default function PatientRegistrationPage() {
     </>
   );
 }
-
-    
