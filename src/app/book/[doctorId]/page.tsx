@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -11,11 +12,15 @@ import { Calendar } from "@/components/ui/calendar";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Star, MapPin, Video, Hospital, Calendar as CalendarIcon, Clock, ArrowLeft } from "lucide-react";
+import { Star, MapPin, Video, Hospital, Calendar as CalendarIcon, Clock, ArrowLeft, Loader2 } from "lucide-react";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+
 
 export default function BookAppointmentPage({ params }: { params: { doctorId: string } }) {
     const { toast } = useToast();
     const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
 
     const doctor = doctors.find(d => d.id === params.doctorId);
 
@@ -29,7 +34,7 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
 
     const timeSlots = ["10:00 AM", "11:00 AM", "12:00 PM", "02:00 PM", "03:00 PM", "04:00 PM"];
 
-    const handleBooking = () => {
+    const handleBooking = async () => {
         if (!selectedDate || !selectedSlot) {
             toast({
                 variant: "destructive",
@@ -39,21 +44,41 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
             return;
         }
 
-        // TODO: Implement actual booking logic
-        console.log({
-            doctorId: doctor.id,
-            date: selectedDate,
-            time: selectedSlot,
-            type: selectedConsultation,
-        });
+        setIsLoading(true);
 
-        toast({
-            title: "Appointment Booked!",
-            description: `Your appointment with ${doctor.name} on ${selectedDate.toLocaleDateString()} at ${selectedSlot} is confirmed.`,
-        });
+        try {
+            // This is a placeholder for the logged-in patient's ID.
+            const patientId = "user-placeholder-id"; 
 
-        // Redirect to dashboard after booking
-        router.push('/patient/dashboard');
+            await addDoc(collection(db, "appointments"), {
+                doctorId: doctor.id,
+                doctorName: doctor.name,
+                patientId: patientId, // Replace with actual patient ID
+                appointmentDate: selectedDate,
+                appointmentTime: selectedSlot,
+                consultationType: selectedConsultation,
+                status: "confirmed",
+                createdAt: serverTimestamp(),
+            });
+
+            toast({
+                title: "Appointment Booked!",
+                description: `Your appointment with ${doctor.name} on ${selectedDate.toLocaleDateString()} at ${selectedSlot} is confirmed.`,
+            });
+
+            // Redirect to dashboard after booking
+            router.push('/patient/dashboard');
+
+        } catch (error) {
+            console.error("Booking Error: ", error);
+            toast({
+                variant: "destructive",
+                title: "Booking Failed",
+                description: "Could not book your appointment. Please try again.",
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
     
     return (
@@ -159,7 +184,9 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
 
                         </CardContent>
                         <CardFooter>
-                            <Button className="w-full" size="lg" onClick={handleBooking}>Confirm Booking</Button>
+                            <Button className="w-full" size="lg" onClick={handleBooking} disabled={isLoading}>
+                                {isLoading ? <Loader2 className="animate-spin" /> : 'Confirm Booking'}
+                            </Button>
                         </CardFooter>
                     </Card>
                 </div>
