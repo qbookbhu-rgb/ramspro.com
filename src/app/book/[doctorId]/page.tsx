@@ -181,7 +181,7 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
                                 >
                                     {consultationTypes.map(type => (
                                         <div key={type.name} className="flex items-center space-x-2">
-                                             <RadioGroupItem value={type.name.toLowerCase()} id={type.name.toLowerCase()} />
+                                             <RadioGroupItem value={type.name.toLowerCase()} id={type.name.toLowerCase()} disabled={doctor.availability === 'online' && type.name === 'In-Clinic'} />
                                              <Label htmlFor={type.name.toLowerCase()} className="flex items-center gap-2 cursor-pointer">
                                                 <type.icon className="h-4 w-4 text-muted-foreground" />
                                                 {type.name}
@@ -203,5 +203,3 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
         </div>
     );
 }
-
-    

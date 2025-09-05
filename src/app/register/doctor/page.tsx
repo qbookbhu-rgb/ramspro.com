@@ -156,10 +156,10 @@ export default function DoctorRegistrationPage() {
                         <FormItem><FormLabel>Medical Registration No.</FormLabel><FormControl><Input placeholder="e.g., MCI12345" {...field} /></FormControl><FormMessage /></FormItem>
                     )}/>
                     <FormField name="experience" control={form.control} render={({ field }) => (
-                        <FormItem><FormLabel>Years of Experience</FormLabel><FormControl><Input type="number" placeholder="e.g., 10" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Years of Experience</FormLabel><FormControl><Input type="number" placeholder="e.g., 10" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl><FormMessage /></FormItem>
                     )}/>
                     <FormField name="consultationFee" control={form.control} render={({ field }) => (
-                        <FormItem><FormLabel>Consultation Fee (INR)</FormLabel><FormControl><Input type="number" placeholder="e.g., 500" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Consultation Fee (INR)</FormLabel><FormControl><Input type="number" placeholder="e.g., 500" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)}/></FormControl><FormMessage /></FormItem>
                     )}/>
                  </div>
               </section>
