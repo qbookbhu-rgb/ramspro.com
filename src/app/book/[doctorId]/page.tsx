@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Star, MapPin, Video, Hospital, Calendar as CalendarIcon, Clock, ArrowLeft, Loader2 } from "lucide-react";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, doc, getDoc } from "firebase/firestore";
 import { useAuth } from "@/hooks/use-auth";
 
 
@@ -24,11 +24,31 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
     const { user } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
 
+    // This finds the doctor from the static data.
+    // In a real app, you would fetch this from Firestore using the doctorId.
     const doctor = doctors.find(d => d.id === params.doctorId);
 
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
     const [selectedSlot, setSelectedSlot] = useState<string | undefined>();
     const [selectedConsultation, setSelectedConsultation] = useState<string>(doctor?.availability === 'online' ? 'video' : 'in-clinic');
+    const [doctorUid, setDoctorUid] = useState<string | null>(null);
+
+    // This is a workaround to find the doctor's UID since we don't have it in the static data.
+    // In a real app, the `doctors` would be a Firestore collection and you'd query it directly.
+    useEffect(() => {
+        const findDoctorUid = async () => {
+            if (doctor) {
+                // This is a placeholder for finding the doctor's real UID.
+                // For the demo, we assume we can find a doctor document that matches the name.
+                // This is not a robust solution for a production app.
+                // A better approach would be to have the UID in the initial doctor list.
+                // Since we don't have a `doctors` collection yet, this will fail gracefully.
+                // We will use the static ID as a fallback for the `doctorId` field.
+            }
+        };
+        findDoctorUid();
+    }, [doctor]);
+
 
     if (!doctor) {
         notFound();
@@ -59,10 +79,27 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
         setIsLoading(true);
 
         try {
+            // This is a placeholder logic. You should have a 'doctors' collection
+            // where each doctor document has a `uid` field.
+            // For now, we'll hardcode the UID for the first doctor for demonstration.
+            let targetDoctorId = doctor.id === '1' ? 'REPLACE_WITH_DOCTOR_1_UID' :
+                                 doctor.id === '2' ? 'REPLACE_WITH_DOCTOR_2_UID' :
+                                 doctor.id; // Fallback to static id
+
+             // A more robust way would be to query the 'doctors' collection by a unique field,
+             // e.g., their registration number, to get their UID. Since we don't have that yet,
+             // this logic is for demonstration.
+             // For the sake of the demo, let's just use the static doctor.id
+             // and assume it's the doctor's actual UID for now.
+             // You need to register doctors to get their UIDs.
+             // Let's assume the static doctor ID is the UID for now.
+             targetDoctorId = doctor.id;
+
+
             await addDoc(collection(db, "appointments"), {
-                doctorId: doctor.id,
+                doctorId: targetDoctorId,
                 doctorName: doctor.name,
-                patientId: user.uid, // Use actual patient ID
+                patientId: user.uid,
                 appointmentDate: selectedDate,
                 appointmentTime: selectedSlot,
                 consultationType: selectedConsultation,

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Languages, Menu, UserCircle, X, LogOut } from "lucide-react";
+import { Languages, Menu, UserCircle, X, LogOut, Briefcase } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 import { cn } from "@/lib/utils";
@@ -17,17 +17,33 @@ import {
 import { languages } from "@/lib/data";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { LoginDialog } from "./login-dialog";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 const navLinks = [
   { href: "/#find-a-doctor", label: "Find a Doctor" },
   { href: "/#wellness", label: "Wellness" },
-  { href: "#", label: "For Doctors" },
+  { href: "/register/doctor", label: "For Doctors" },
 ];
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const { user, signOut, loading } = useAuth();
+  const [isPatient, setIsPatient] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      const checkUserRole = async () => {
+        const patientDocRef = doc(db, 'patients', user.uid);
+        const patientDoc = await getDoc(patientDocRef);
+        setIsPatient(patientDoc.exists());
+      };
+      checkUserRole();
+    } else {
+      setIsPatient(null);
+    }
+  }, [user]);
 
   const getInitials = (name?: string | null) => {
     if (!name) return "U";
@@ -85,12 +101,22 @@ export default function Header() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <Link href="/patient/dashboard">
-                    <UserCircle className="mr-2" />
-                    My Dashboard
-                  </Link>
-                </DropdownMenuItem>
+                { isPatient === true && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/patient/dashboard">
+                      <UserCircle className="mr-2" />
+                      My Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                 { isPatient === false && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/doctor/dashboard">
+                      <Briefcase className="mr-2" />
+                      Doctor Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={signOut}>
                   <LogOut className="mr-2" />
@@ -141,5 +167,3 @@ export default function Header() {
     </>
   );
 }
-
-    

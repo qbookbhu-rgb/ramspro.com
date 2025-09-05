@@ -58,6 +58,7 @@ export default function DoctorRegistrationPage() {
         mobile: "",
         email: "",
         profileType: "practitioner",
+        specialization: "",
         qualification: "",
         registrationNumber: "",
         experience: 0,
@@ -76,9 +77,9 @@ export default function DoctorRegistrationPage() {
     if (result.success) {
         toast({
             title: "Registration Submitted",
-            description: "Your profile is under review. You'll be notified upon approval.",
+            description: "Your doctor profile has been created. Please login to continue.",
         });
-        router.push('/'); // Redirect to home page after submission
+        router.push('/'); // Redirect to home page to login
     } else {
         toast({
             variant: "destructive",
@@ -201,7 +202,7 @@ export default function DoctorRegistrationPage() {
               </section>
               
               <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Submit for Verification'}
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Complete Registration'}
               </Button>
             </form>
           </Form>
