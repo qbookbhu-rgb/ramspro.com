@@ -3,7 +3,7 @@
 
 import { aiSymptomChecker, type AISymptomCheckerInput } from "@/ai/flows/ai-symptom-checker";
 import { auth, db } from "@/lib/firebase-admin";
-import { collection, setDoc, doc, addDoc, serverTimestamp, getDoc } from "firebase/firestore";
+import { collection, setDoc, doc, addDoc, getDoc } from "firebase/firestore";
 
 export async function getDoctorRecommendation(input: AISymptomCheckerInput) {
   try {
@@ -15,24 +15,22 @@ export async function getDoctorRecommendation(input: AISymptomCheckerInput) {
   }
 }
 
-export async function registerPatient(formData: any) {
+export async function registerPatient(uid: string, formData: any) {
   const { name, mobile, email, age, gender, city } = formData;
   try {
-    // Create user in Firebase Auth
-    const userRecord = await auth.createUser({
+    // User is already created via OTP, so we just update the display name and email
+     await auth.updateUser(uid, {
       email: email || undefined,
-      phoneNumber: `+91${mobile}`,
       displayName: name,
-      disabled: false,
     });
 
     // Generate a unique patient ID
     const patientId = `RAMS-P-${Date.now()}`;
 
     // Save additional user details in Firestore
-    const patientRef = doc(db, 'patients', userRecord.uid);
+    const patientRef = doc(db, 'patients', uid);
     await setDoc(patientRef, {
-      uid: userRecord.uid,
+      uid: uid,
       patientId: patientId,
       name,
       mobile,
@@ -43,7 +41,7 @@ export async function registerPatient(formData: any) {
       createdAt: new Date().toISOString(),
     });
 
-    return { success: true, data: { uid: userRecord.uid, patientId } };
+    return { success: true, data: { uid, patientId } };
   } catch (error: any) {
     console.error("Patient Registration Error:", error);
     // Provide a more user-friendly error message
@@ -58,25 +56,19 @@ export async function registerPatient(formData: any) {
 }
 
 
-export async function registerDoctor(formData: any) {
+export async function registerDoctor(uid: string, formData: any) {
   const { name, mobile, email, specialization, qualification, registrationNumber, experience, consultationFee, bankDetails, city } = formData;
   try {
-    // In a real app, you'd create an auth user
-    // and save this to a 'doctors' collection in Firestore after verification.
-    
-    // NOTE: For demo purposes, we are creating the user directly.
-    // In production, you would want to have an admin approval flow.
-    const userRecord = await auth.createUser({
-      email: email,
-      phoneNumber: `+91${mobile}`,
-      displayName: name,
-      disabled: false, // In a real app, you might start with 'true' until verified
+    // User is already created via OTP, so we just update the display name and email
+    await auth.updateUser(uid, {
+        email: email,
+        displayName: name,
     });
 
     const doctorId = `RAMS-D-${Date.now()}`;
 
-    await setDoc(doc(db, 'doctors', userRecord.uid), {
-      uid: userRecord.uid,
+    await setDoc(doc(db, 'doctors', uid), {
+      uid: uid,
       doctorId,
       name,
       mobile,

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -19,6 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { LoginDialog } from "./login-dialog";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { getUserRole } from "@/app/actions";
 
 const navLinks = [
   { href: "/#find-a-doctor", label: "Find a Doctor" },
@@ -30,18 +32,17 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const { user, signOut, loading } = useAuth();
-  const [isPatient, setIsPatient] = useState<boolean | null>(null);
+  const [userRole, setUserRole] = useState<'patient' | 'doctor' | 'unknown' | null>(null);
 
   useEffect(() => {
     if (user) {
       const checkUserRole = async () => {
-        const patientDocRef = doc(db, 'patients', user.uid);
-        const patientDoc = await getDoc(patientDocRef);
-        setIsPatient(patientDoc.exists());
+        const { role } = await getUserRole(user.uid);
+        setUserRole(role);
       };
       checkUserRole();
     } else {
-      setIsPatient(null);
+      setUserRole(null);
     }
   }, [user]);
 
@@ -101,7 +102,7 @@ export default function Header() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                { isPatient === true && (
+                { userRole === 'patient' && (
                   <DropdownMenuItem asChild>
                     <Link href="/patient/dashboard">
                       <UserCircle className="mr-2" />
@@ -109,7 +110,7 @@ export default function Header() {
                     </Link>
                   </DropdownMenuItem>
                 )}
-                 { isPatient === false && (
+                 { userRole === 'doctor' && (
                   <DropdownMenuItem asChild>
                     <Link href="/doctor/dashboard">
                       <Briefcase className="mr-2" />

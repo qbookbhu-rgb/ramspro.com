@@ -30,6 +30,10 @@ import { useToast } from "@/hooks/use-toast";
 import { registerDoctor } from "@/app/actions";
 import { specialties } from "@/lib/data";
 import { Textarea } from "@/components/ui/textarea";
+import { auth } from "@/lib/firebase";
+import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -47,12 +51,16 @@ const formSchema = z.object({
   city: z.string().min(2, "City is required."),
 });
 
+type FormData = z.infer<typeof formSchema>;
+
 export default function DoctorRegistrationPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [showOtpDialog, setShowOtpDialog] = useState(false);
+  const [otp, setOtp] = useState("");
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
         name: "",
@@ -71,27 +79,86 @@ export default function DoctorRegistrationPage() {
 
   const profileType = form.watch("profileType");
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-    const result = await registerDoctor(values);
-    setIsLoading(false);
-
-    if (result.success) {
-        toast({
-            title: "Registration Submitted",
-            description: "Your doctor profile has been created. Please login to continue.",
-        });
-        router.push('/'); // Redirect to home page to login
-    } else {
-        toast({
-            variant: "destructive",
-            title: "Registration Failed",
-            description: result.error || "An unknown error occurred.",
-        });
+  const generateRecaptcha = () => {
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible',
+        'callback': (response: any) => {
+          // reCAPTCHA solved, allow signInWithPhoneNumber.
+        }
+      });
     }
   }
 
+  const handleSendOtp = (phoneNumber: string) => {
+    setIsLoading(true);
+    generateRecaptcha();
+    let appVerifier = window.recaptchaVerifier;
+    signInWithPhoneNumber(auth, `+91${phoneNumber}`, appVerifier)
+      .then(confirmationResult => {
+        window.confirmationResult = confirmationResult;
+        setShowOtpDialog(true);
+        toast({
+          title: "OTP Sent!",
+          description: "Please check your phone for the OTP.",
+        });
+      }).catch(error => {
+        console.error("SMS not sent", error);
+        toast({
+          variant: "destructive",
+          title: "OTP Failed",
+          description: "Could not send OTP. Please try again.",
+        });
+      }).finally(() => {
+        setIsLoading(false);
+      });
+  }
+
+  function onSubmit(values: FormData) {
+    handleSendOtp(values.mobile);
+  }
+
+  async function handleOtpSubmit() {
+    setIsLoading(true);
+    let confirmationResult = window.confirmationResult;
+    confirmationResult.confirm(otp).then(async (result: any) => {
+        // User signed in successfully.
+        const user = result.user;
+        
+        const registrationData = form.getValues();
+        const finalResult = await registerDoctor(user.uid, registrationData);
+
+        if (finalResult.success) {
+          toast({
+            title: "Registration Successful!",
+            description: "Your doctor account has been created.",
+          });
+          router.push('/doctor/dashboard');
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Registration Failed",
+            description: finalResult.error || "An unknown error occurred.",
+          });
+        }
+
+    }).catch((error: any) => {
+        // User couldn't sign in (bad verification code?)
+        console.error("OTP verification failed", error);
+        toast({
+          variant: "destructive",
+          title: "OTP Invalid",
+          description: "The OTP you entered is incorrect.",
+        });
+    }).finally(() => {
+        setIsLoading(false);
+        setShowOtpDialog(false);
+    });
+  }
+
+
   return (
+    <>
     <div className="container py-20 flex justify-center">
       <Card className="w-full max-w-3xl shadow-xl">
         <CardHeader>
@@ -113,16 +180,16 @@ export default function DoctorRegistrationPage() {
                 <h3 className="font-bold text-lg mb-4 border-b pb-2">Personal Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField name="name" control={form.control} render={({ field }) => (
-                        <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="e.g., Dr. John Doe" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="e.g., Dr. Jane Smith" {...field} /></FormControl><FormMessage /></FormItem>
                     )}/>
                     <FormField name="mobile" control={form.control} render={({ field }) => (
                         <FormItem><FormLabel>Mobile Number</FormLabel><FormControl><Input placeholder="e.g., 9876543210" {...field} /></FormControl><FormMessage /></FormItem>
                     )}/>
                     <FormField name="email" control={form.control} render={({ field }) => (
-                        <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input placeholder="e.g., john.doe@example.com" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input placeholder="e.g., jane.smith@example.com" {...field} /></FormControl><FormMessage /></FormItem>
                     )}/>
                      <FormField name="city" control={form.control} render={({ field }) => (
-                        <FormItem><FormLabel>City</FormLabel><FormControl><Input placeholder="e.g., Mumbai" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>City</FormLabel><FormControl><Input placeholder="e.g., Bengaluru" {...field} /></FormControl><FormMessage /></FormItem>
                     )}/>
                 </div>
               </section>
@@ -207,12 +274,39 @@ export default function DoctorRegistrationPage() {
               </section>
               
               <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Complete Registration'}
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Send OTP & Register'}
               </Button>
             </form>
           </Form>
         </CardContent>
       </Card>
     </div>
+    <div id="recaptcha-container"></div>
+    <Dialog open={showOtpDialog} onOpenChange={setShowOtpDialog}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Enter OTP</DialogTitle>
+          <DialogDescription>
+            We've sent a 6-digit OTP to your mobile number. Please enter it below to complete registration.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col items-center gap-4">
+          <InputOTP maxLength={6} value={otp} onChange={setOtp}>
+            <InputOTPGroup>
+              <InputOTPSlot index={0} />
+              <InputOTPSlot index={1} />
+              <InputOTPSlot index={2} />
+              <InputOTPSlot index={3} />
+              <InputOTPSlot index={4} />
+              <InputOTPSlot index={5} />
+            </InputOTPGroup>
+          </InputOTP>
+          <Button onClick={handleOtpSubmit} disabled={isLoading || otp.length < 6} className="w-full">
+             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Verify & Complete Registration'}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

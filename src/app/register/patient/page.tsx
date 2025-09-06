@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -9,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -52,6 +52,8 @@ const formSchema = z.object({
   city: z.string().min(2, "City must be at least 2 characters."),
 });
 
+type FormData = z.infer<typeof formSchema>;
+
 export default function PatientRegistrationPage() {
   const router = useRouter();
   const { toast } = useToast();
@@ -60,7 +62,7 @@ export default function PatientRegistrationPage() {
   const [otp, setOtp] = useState("");
 
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -106,7 +108,7 @@ export default function PatientRegistrationPage() {
       })
   }
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: FormData) {
     handleSendOtp(values.mobile)
     // The rest of the logic is now in handleOtpSubmit
   }
@@ -119,7 +121,7 @@ export default function PatientRegistrationPage() {
         const user = result.user;
         
         const registrationData = form.getValues();
-        const finalResult = await registerPatient(registrationData);
+        const finalResult = await registerPatient(user.uid, registrationData);
 
         if (finalResult.success) {
           toast({
