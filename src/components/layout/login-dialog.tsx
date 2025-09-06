@@ -21,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2,LogIn } from "lucide-react";
-import { getUserRole } from "@/app/actions";
+import { useAuth } from "@/hooks/use-auth";
 
 interface LoginDialogProps {
     isOpen: boolean;
@@ -31,6 +31,7 @@ interface LoginDialogProps {
 export function LoginDialog({ isOpen, onOpenChange }: LoginDialogProps) {
   const { toast } = useToast();
   const router = useRouter();
+  const { userRole } = useAuth(); // We can get the role from the auth context now
   const [step, setStep] = useState<'mobile' | 'otp'>('mobile');
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
@@ -85,11 +86,11 @@ export function LoginDialog({ isOpen, onOpenChange }: LoginDialogProps) {
         });
         onOpenChange(false); // Close the dialog
 
-        // Check user role and redirect
-        const { role } = await getUserRole(result.user.uid);
-        if (role === 'patient') {
+        // The redirect logic is now handled by the useAuth hook's effect
+        // but we can still push to a default dashboard as a fallback.
+        if (userRole === 'patient') {
             router.push('/patient/dashboard');
-        } else if (role === 'doctor') {
+        } else if (userRole === 'doctor') {
             router.push('/doctor/dashboard');
         } else {
             // Default redirect if role is unknown or user is new

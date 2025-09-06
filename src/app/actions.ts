@@ -3,7 +3,7 @@
 
 import { aiSymptomChecker, type AISymptomCheckerInput } from "@/ai/flows/ai-symptom-checker";
 import { auth, db } from "@/lib/firebase-admin";
-import { collection, setDoc, doc, addDoc, getDoc } from "firebase/firestore";
+import { collection, setDoc, doc, addDoc, getDoc, updateDoc } from "firebase/firestore";
 
 export async function getDoctorRecommendation(input: AISymptomCheckerInput) {
   try {
@@ -117,23 +117,40 @@ export async function createPrescription(values: any, appointment: any) {
     }
 }
 
-export async function getUserRole(uid: string): Promise<{ role: 'patient' | 'doctor' | 'unknown' }> {
+export async function getUserRole(uid: string): Promise<{ role: 'patient' | 'doctor' | 'unknown'; data: any | null }> {
   try {
     const patientDocRef = doc(db, 'patients', uid);
     const patientDoc = await getDoc(patientDocRef);
     if (patientDoc.exists()) {
-      return { role: 'patient' };
+      return { role: 'patient', data: patientDoc.data() };
     }
 
     const doctorDocRef = doc(db, 'doctors', uid);
     const doctorDoc = await getDoc(doctorDocRef);
     if (doctorDoc.exists()) {
-      return { role: 'doctor' };
+      return { role: 'doctor', data: doctorDoc.data() };
     }
 
-    return { role: 'unknown' };
+    return { role: 'unknown', data: null };
   } catch (error) {
     console.error("Error getting user role:", error);
-    return { role: 'unknown' };
+    return { role: 'unknown', data: null };
+  }
+}
+
+export async function updateUserProfile(uid: string, role: 'patient' | 'doctor', data: any) {
+  try {
+    const userRef = doc(db, `${role}s`, uid); // pluralizes role to get collection name
+    await updateDoc(userRef, data);
+
+    // Also update the display name in Firebase Auth if the name is being changed
+    if (data.name) {
+      await auth.updateUser(uid, { displayName: data.name });
+    }
+
+    return { success: true, message: 'Profile updated successfully.' };
+  } catch (error: any) {
+    console.error("Error updating user profile:", error);
+    return { success: false, error: "Failed to update profile. Please try again." };
   }
 }

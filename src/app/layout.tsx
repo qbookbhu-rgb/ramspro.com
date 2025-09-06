@@ -27,7 +27,7 @@ export default function RootLayout({
       </head>
       <body className={cn('min-h-screen bg-background font-body antialiased')}>
         <AuthProvider>
-          <div className="relative flex min-h-dvh flex-col">
+          <div className="relative flex min-h-dvh flex-col bg-background">
             <Header />
             <main className="flex-1">{children}</main>
             <Footer />
@@ -39,5 +39,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-    

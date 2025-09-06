@@ -18,8 +18,6 @@ import {
 import { languages } from "@/lib/data";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { LoginDialog } from "./login-dialog";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { getUserRole } from "@/app/actions";
 
 const navLinks = [
@@ -31,21 +29,8 @@ const navLinks = [
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const { user, signOut, loading } = useAuth();
-  const [userRole, setUserRole] = useState<'patient' | 'doctor' | 'unknown' | null>(null);
-
-  useEffect(() => {
-    if (user) {
-      const checkUserRole = async () => {
-        const { role } = await getUserRole(user.uid);
-        setUserRole(role);
-      };
-      checkUserRole();
-    } else {
-      setUserRole(null);
-    }
-  }, [user]);
-
+  const { user, signOut, loading, userRole } = useAuth();
+  
   const getInitials = (name?: string | null) => {
     if (!name) return "U";
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();

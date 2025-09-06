@@ -11,9 +11,10 @@ import DoctorSearchSection from "@/components/home/doctor-search-section";
 import WellnessSection from "@/components/home/wellness-section";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, FileText, LayoutDashboard, Loader2 } from "lucide-react";
+import { Calendar, FileText, LayoutDashboard, Loader2, UserCog } from "lucide-react";
 import UpcomingAppointments from "@/components/patient/upcoming-appointments";
 import MedicalRecords from "@/components/patient/medical-records";
+import ProfileForm from "@/components/profile/profile-form";
 
 interface PatientData {
   name: string;
@@ -90,7 +91,7 @@ export default function PatientDashboardPage() {
       </div>
       
       <Tabs defaultValue="dashboard">
-        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 mb-8 h-auto">
+        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-4 mb-8 h-auto">
           <TabsTrigger value="dashboard" className="py-2">
             <LayoutDashboard className="mr-2" />
             Dashboard
@@ -102,6 +103,10 @@ export default function PatientDashboardPage() {
           <TabsTrigger value="records" className="py-2">
             <FileText className="mr-2" />
             Medical Records
+          </TabsTrigger>
+          <TabsTrigger value="profile" className="py-2">
+            <UserCog className="mr-2" />
+            My Profile
           </TabsTrigger>
         </TabsList>
 
@@ -134,6 +139,9 @@ export default function PatientDashboardPage() {
         </TabsContent>
         <TabsContent value="records">
             <MedicalRecords />
+        </TabsContent>
+        <TabsContent value="profile">
+            <ProfileForm />
         </TabsContent>
       </Tabs>
     </div>

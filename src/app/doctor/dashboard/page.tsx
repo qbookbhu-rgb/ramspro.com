@@ -7,9 +7,10 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/hooks/use-auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, LayoutDashboard, Loader2, User } from "lucide-react";
+import { Calendar, LayoutDashboard, Loader2, UserCog } from "lucide-react";
 import UpcomingAppointments from "@/components/doctor/upcoming-appointments";
 import DashboardAnalytics from "@/components/doctor/dashboard-analytics";
+import ProfileForm from "@/components/profile/profile-form";
 
 interface DoctorData {
   name: string;
@@ -81,7 +82,7 @@ export default function DoctorDashboardPage() {
       </div>
       
       <Tabs defaultValue="dashboard">
-        <TabsList className="grid w-full grid-cols-2 mb-8 h-auto">
+        <TabsList className="grid w-full grid-cols-3 mb-8 h-auto">
           <TabsTrigger value="dashboard" className="py-2">
             <LayoutDashboard className="mr-2" />
             Dashboard
@@ -90,6 +91,10 @@ export default function DoctorDashboardPage() {
             <Calendar className="mr-2" />
             Appointments
             </TabsTrigger>
+           <TabsTrigger value="profile" className="py-2">
+            <UserCog className="mr-2" />
+            My Profile
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard">
@@ -99,6 +104,9 @@ export default function DoctorDashboardPage() {
            <div className="space-y-8">
              <UpcomingAppointments />
            </div>
+        </TabsContent>
+         <TabsContent value="profile">
+            <ProfileForm />
         </TabsContent>
       </Tabs>
     </div>
