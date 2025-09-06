@@ -71,7 +71,7 @@ export default function UpcomingAppointments() {
                         {appointments.map(app => (
                             <div key={app.id} className="border p-4 rounded-lg flex flex-col sm:flex-row justify-between items-start gap-4">
                                 <div className="flex-1">
-                                    <p className="font-bold flex items-center gap-2"><User className="h-4 w-4 text-primary" /> {app.doctorName}</p>
+                                    <p className="font-bold flex items-center gap-2"><User className="h-4 w-4 text-primary" /> Dr. {app.doctorName}</p>
                                     <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
                                         <Calendar className="h-4 w-4" /> 
                                         {format(new Date(app.appointmentDate.seconds * 1000), 'PPP')}
@@ -98,5 +98,3 @@ export default function UpcomingAppointments() {
         </Card>
     );
 }
-
-    
