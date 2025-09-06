@@ -2,6 +2,7 @@
 "use server";
 
 import { aiSymptomChecker, type AISymptomCheckerInput } from "@/ai/flows/ai-symptom-checker";
+import { aiPrescriptionAssistant, type AIPrescriptionAssistantInput } from "@/ai/flows/ai-prescription-assistant";
 import { auth, db } from "@/lib/firebase-admin";
 import { collection, setDoc, doc, addDoc, getDoc, updateDoc } from "firebase/firestore";
 
@@ -13,6 +14,16 @@ export async function getDoctorRecommendation(input: AISymptomCheckerInput) {
     console.error("AI Symptom Checker Error:", error);
     return { success: false, error: "Failed to get recommendation. Please try again." };
   }
+}
+
+export async function getPrescriptionSuggestion(input: AIPrescriptionAssistantInput) {
+    try {
+        const result = await aiPrescriptionAssistant(input);
+        return { success: true, data: result };
+    } catch (error) {
+        console.error("AI Prescription Assistant Error:", error);
+        return { success: false, error: "Failed to get suggestions. Please try again." };
+    }
 }
 
 export async function registerPatient(uid: string, formData: any) {

@@ -11,11 +11,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, ArrowLeft, Plus, Trash2, FileText } from 'lucide-react';
+import { Loader2, ArrowLeft, Plus, Trash2, FileText, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import { createPrescription } from '@/app/actions';
+import { createPrescription, getPrescriptionSuggestion } from '@/app/actions';
 
 // Define the schema for a single medication
 const medicationSchema = z.object({
@@ -44,6 +44,7 @@ export default function CreatePrescriptionPage({ params }: { params: { appointme
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isAiLoading, setIsAiLoading] = useState(false);
   const [appointment, setAppointment] = useState<AppointmentData | null>(null);
   const [isAppointmentLoading, setIsAppointmentLoading] = useState(true);
 
@@ -56,10 +57,12 @@ export default function CreatePrescriptionPage({ params }: { params: { appointme
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control: form.control,
     name: 'medications',
   });
+
+  const diagnosisValue = form.watch('diagnosis');
 
   useEffect(() => {
     const fetchAppointment = async () => {
@@ -99,6 +102,44 @@ export default function CreatePrescriptionPage({ params }: { params: { appointme
 
     fetchAppointment();
   }, [params.appointmentId, toast]);
+
+  const handleAiAssist = async () => {
+    const diagnosis = form.getValues('diagnosis');
+    if (!diagnosis || diagnosis.length < 10) {
+      toast({
+        variant: 'destructive',
+        title: 'Diagnosis Too Short',
+        description: 'Please enter a diagnosis of at least 10 characters to use the AI assistant.',
+      });
+      return;
+    }
+    setIsAiLoading(true);
+
+    const result = await getPrescriptionSuggestion({ diagnosis });
+    
+    if (result.success && result.data && result.data.medications.length > 0) {
+      // @ts-ignore
+      replace(result.data.medications);
+      toast({
+        title: 'AI Suggestions Applied',
+        description: 'The AI recommendations have been added. Please review them carefully.',
+      });
+    } else if (result.error) {
+       toast({
+        variant: 'destructive',
+        title: 'AI Assistant Error',
+        description: result.error,
+      });
+    } else {
+        toast({
+            variant: 'destructive',
+            title: 'No Suggestions Found',
+            description: 'The AI could not generate suggestions for this diagnosis.',
+        });
+    }
+
+    setIsAiLoading(false);
+  }
 
   async function onSubmit(values: FormData) {
     if (!appointment) {
@@ -163,7 +204,13 @@ export default function CreatePrescriptionPage({ params }: { params: { appointme
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-lg font-semibold">Diagnosis</FormLabel>
+                    <div className="flex justify-between items-center">
+                        <FormLabel className="text-lg font-semibold">Diagnosis</FormLabel>
+                        <Button type="button" size="sm" variant="outline" onClick={handleAiAssist} disabled={isAiLoading || diagnosisValue.length < 10}>
+                            {isAiLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
+                             AI Assistant
+                        </Button>
+                    </div>
                     <FormControl>
                       <Textarea placeholder="Enter the patient's diagnosis..." {...field} />
                     </FormControl>
