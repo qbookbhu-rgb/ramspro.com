@@ -124,7 +124,7 @@ export default function DoctorSearchSection() {
                 onChange={(e) => setLocationQuery(e.target.value)}
               />
             </div>
-            <Select onValueChange={setSpecialtyQuery} value={specialtyQuery}>
+            <Select onValuechange={setSpecialtyQuery} value={specialtyQuery}>
               <SelectTrigger>
                 <SelectValue placeholder="Filter by Specialty" />
               </SelectTrigger>
