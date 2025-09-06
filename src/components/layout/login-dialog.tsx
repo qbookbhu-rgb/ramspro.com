@@ -125,7 +125,6 @@ export function LoginDialog({ isOpen, onOpenChange }: LoginDialogProps) {
   }
 
   return (
-    <>
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
@@ -179,8 +178,6 @@ export function LoginDialog({ isOpen, onOpenChange }: LoginDialogProps) {
         </DialogHeader>
       </DialogContent>
     </Dialog>
-    <div id="recaptcha-container"></div>
-    </>
   )
 
 }

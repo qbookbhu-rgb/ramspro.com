@@ -34,6 +34,7 @@ export default function RootLayout({
           </div>
           <SosButton />
           <Toaster />
+          <div id="recaptcha-container"></div>
         </AuthProvider>
       </body>
     </html>

@@ -243,7 +243,7 @@ export default function DoctorRegistrationPage() {
                         <FormItem><FormLabel>Qualification</FormLabel><FormControl><Input placeholder="e.g., MBBS, MD" {...field} /></FormControl><FormMessage /></FormItem>
                     )}/>
                     <FormField name="registrationNumber" control={form.control} render={({ field }) => (
-                        <FormItem><FormLabel>Medical Registration No.</FormLabel><FormControl><Input placeholder="e.g., MCI12345" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Medical Registration No.</FormLabel><FormControl><Input placeholder="e.g., MCI12345" {...field} /></FormControl><FormMessage /></FormMessage>
                     )}/>
                     <FormField name="experience" control={form.control} render={({ field }) => (
                         <FormItem><FormLabel>Years of Experience</FormLabel><FormControl><Input type="number" placeholder="e.g., 10" {...field} /></FormControl><FormMessage /></FormItem>
@@ -298,7 +298,6 @@ export default function DoctorRegistrationPage() {
         </CardContent>
       </Card>
     </div>
-    <div id="recaptcha-container"></div>
     <Dialog open={showOtpDialog} onOpenChange={setShowOtpDialog}>
       <DialogContent>
         <DialogHeader>

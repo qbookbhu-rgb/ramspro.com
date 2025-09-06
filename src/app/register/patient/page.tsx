@@ -295,7 +295,6 @@ export default function PatientRegistrationPage() {
         </CardContent>
       </Card>
     </div>
-    <div id="recaptcha-container"></div>
     <Dialog open={showOtpDialog} onOpenChange={setShowOtpDialog}>
       <DialogContent>
         <DialogHeader>
