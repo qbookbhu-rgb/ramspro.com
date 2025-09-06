@@ -206,7 +206,7 @@ export default function CreatePrescriptionPage({ params }: { params: { appointme
                   <FormItem>
                     <div className="flex justify-between items-center">
                         <FormLabel className="text-lg font-semibold">Diagnosis</FormLabel>
-                        <Button type="button" size="sm" variant="outline" onClick={handleAiAssist} disabled={isAiLoading || diagnosisValue.length < 10}>
+                        <Button type="button" size="sm" variant="outline" onClick={handleAiAssist} disabled={isAiLoading || !diagnosisValue || diagnosisValue.length < 10}>
                             {isAiLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
                              AI Assistant
                         </Button>
@@ -223,15 +223,15 @@ export default function CreatePrescriptionPage({ params }: { params: { appointme
                 <h3 className="text-lg font-semibold mb-4">Medications</h3>
                 <div className="space-y-6">
                   {fields.map((field, index) => (
-                    <div key={field.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 border p-4 rounded-md relative">
-                       <div className="md:col-span-12">
+                    <div key={field.id} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-4 border p-4 rounded-md relative">
+                       <div className="sm:col-span-2 md:col-span-12">
                           <p className="font-semibold text-primary">Medication #{index + 1}</p>
                        </div>
                        <FormField
                         control={form.control}
                         name={`medications.${index}.name`}
                         render={({ field }) => (
-                          <FormItem className="md:col-span-5">
+                          <FormItem className="sm:col-span-2 md:col-span-5">
                             <FormLabel>Name</FormLabel>
                             <FormControl><Input placeholder="e.g., Paracetamol" {...field} /></FormControl>
                             <FormMessage />
@@ -264,16 +264,16 @@ export default function CreatePrescriptionPage({ params }: { params: { appointme
                         control={form.control}
                         name={`medications.${index}.duration`}
                         render={({ field }) => (
-                           <FormItem className="md:col-span-12">
+                           <FormItem className="sm:col-span-2 md:col-span-12">
                             <FormLabel>Duration</FormLabel>
                             <FormControl><Input placeholder="e.g., 5 days" {...field} /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-                       <div className="md:col-span-12 flex justify-end">
+                       <div className="sm:col-span-2 md:col-span-12 flex justify-end">
                          {fields.length > 1 && (
-                            <Button type="button" variant="destructive" size="sm" onClick={() => remove(index)}>
+                            <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}>
                                 <Trash2 className="h-4 w-4" />
                             </Button>
                          )}
