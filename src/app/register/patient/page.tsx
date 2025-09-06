@@ -49,6 +49,7 @@ const formSchema = z.object({
   email: z.string().email("Please enter a valid email address.").optional().or(z.literal("")),
   age: z.coerce.number().int().min(1, "Age must be at least 1.").max(120, "Age seems unlikely."),
   gender: z.enum(["male", "female", "other"]),
+  bloodGroup: z.enum(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]),
   city: z.string().min(2, "City must be at least 2 characters."),
 });
 
@@ -248,7 +249,31 @@ export default function PatientRegistrationPage() {
                         </FormItem>
                     )}
                 />
-                 <FormField
+                <FormField
+                    control={form.control}
+                    name="bloodGroup"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Blood Group</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select group" />
+                            </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(group => (
+                                <SelectItem key={group} value={group}>{group}</SelectItem>
+                              ))}
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+              </div>
+
+               <FormField
                   control={form.control}
                   name="city"
                   render={({ field }) => (
@@ -261,7 +286,6 @@ export default function PatientRegistrationPage() {
                     </FormItem>
                   )}
                 />
-              </div>
               
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Send OTP & Register'}

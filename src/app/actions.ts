@@ -16,7 +16,7 @@ export async function getDoctorRecommendation(input: AISymptomCheckerInput) {
 }
 
 export async function registerPatient(uid: string, formData: any) {
-  const { name, mobile, email, age, gender, city } = formData;
+  const { name, mobile, email, age, gender, city, bloodGroup } = formData;
   try {
     // User is already created via OTP, so we just update the display name and email
      await auth.updateUser(uid, {
@@ -38,6 +38,7 @@ export async function registerPatient(uid: string, formData: any) {
       age,
       gender,
       city,
+      bloodGroup,
       createdAt: new Date().toISOString(),
     });
 
