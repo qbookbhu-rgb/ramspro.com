@@ -4,8 +4,8 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Search, MapPin, Star, Video, Hospital, Loader2 } from "lucide-react";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { Search, MapPin, Star, Video, Hospital, Loader2, List, Map } from "lucide-react";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { specialties } from "@/lib/data";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useTranslations } from "next-intl";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import DoctorMapView from "./doctor-map-view";
 
 interface Doctor {
     uid: string;
@@ -145,64 +147,79 @@ export default function DoctorSearchSection() {
           </div>
         </CardContent>
       </Card>
+      
+      <Tabs defaultValue="list-view">
+        <div className="flex justify-center mb-8">
+            <TabsList>
+                <TabsTrigger value="list-view"><List className="mr-2 h-4 w-4"/>List View</TabsTrigger>
+                <TabsTrigger value="map-view"><Map className="mr-2 h-4 w-4" />Map View</TabsTrigger>
+            </TabsList>
+        </div>
 
-        {isLoading ? (
-             <div className="container py-10 flex justify-center items-center h-[30vh]">
-                <Loader2 className="h-16 w-16 animate-spin text-primary" />
+        <TabsContent value="list-view">
+            {isLoading ? (
+                <div className="container py-10 flex justify-center items-center h-[30vh]">
+                    <Loader2 className="h-16 w-16 animate-spin text-primary" />
+                </div>
+            ) : filteredDoctors.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredDoctors.map((doctor) => (
+                <Card key={doctor.uid} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <CardHeader className="p-0">
+                        <div className="relative h-48 w-full">
+                            <Image
+                                src={doctor.image}
+                                alt={doctor.name}
+                                fill
+                                className="object-cover"
+                                data-ai-hint={doctor.dataAiHint}
+                            />
+                        </div>
+                    </CardHeader>
+                    <CardContent className="p-6 flex-grow">
+                    <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                        <CardTitle className="text-xl font-headline">{doctor.name}</CardTitle>
+                        <CardDescription className="text-primary font-semibold">{doctor.specialization}</CardDescription>
+                        </div>
+                        {/* Hardcoding online availability for now */}
+                        <Badge variant={'secondary'} className="flex items-center gap-1.5 whitespace-nowrap">
+                            <Video className="h-3 w-3" />
+                            Online
+                        </Badge>
+                    </div>
+
+                    <div className="mt-4 flex items-center gap-1 text-sm text-muted-foreground">
+                        <MapPin className="h-4 w-4" />
+                        <span>{doctor.city}</span>
+                    </div>
+                    
+                    <div className="mt-2 flex items-center gap-1 text-sm">
+                        <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                        <span className="font-bold text-foreground">{doctor.rating.toFixed(1)}</span>
+                        <span className="text-muted-foreground">({doctor.reviews} reviews)</span>
+                    </div>
+                    
+                    </CardContent>
+                    <CardFooter className="p-6 pt-0">
+                    <Button className="w-full" asChild>
+                        <Link href={`/book/${doctor.uid}`}>Book Appointment</Link>
+                    </Button>
+                    </CardFooter>
+                </Card>
+                ))}
             </div>
-        ) : filteredDoctors.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredDoctors.map((doctor) => (
-            <Card key={doctor.uid} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <CardHeader className="p-0">
-                    <div className="relative h-48 w-full">
-                        <Image
-                            src={doctor.image}
-                            alt={doctor.name}
-                            fill
-                            className="object-cover"
-                            data-ai-hint={doctor.dataAiHint}
-                        />
-                    </div>
-                </CardHeader>
-                <CardContent className="p-6 flex-grow">
-                <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                    <CardTitle className="text-xl font-headline">{doctor.name}</CardTitle>
-                    <CardDescription className="text-primary font-semibold">{doctor.specialization}</CardDescription>
-                    </div>
-                    {/* Hardcoding online availability for now */}
-                    <Badge variant={'secondary'} className="flex items-center gap-1.5 whitespace-nowrap">
-                        <Video className="h-3 w-3" />
-                        Online
-                    </Badge>
-                </div>
+        ) : (
+            <div className="text-center py-10">
+                <p className="text-muted-foreground">No doctors found matching your criteria. Try broadening your search.</p>
+            </div>
+        )}
+        </TabsContent>
+        <TabsContent value="map-view">
+            <DoctorMapView doctors={filteredDoctors} />
+        </TabsContent>
+    </Tabs>
 
-                <div className="mt-4 flex items-center gap-1 text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
-                    <span>{doctor.city}</span>
-                </div>
-                
-                <div className="mt-2 flex items-center gap-1 text-sm">
-                    <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                    <span className="font-bold text-foreground">{doctor.rating.toFixed(1)}</span>
-                    <span className="text-muted-foreground">({doctor.reviews} reviews)</span>
-                </div>
-                
-                </CardContent>
-                <CardFooter className="p-6 pt-0">
-                <Button className="w-full" asChild>
-                    <Link href={`/book/${doctor.uid}`}>Book Appointment</Link>
-                </Button>
-                </CardFooter>
-            </Card>
-            ))}
-        </div>
-      ) : (
-        <div className="text-center py-10">
-            <p className="text-muted-foreground">No doctors found matching your criteria. Try broadening your search.</p>
-        </div>
-      )}
     </section>
   );
 }
