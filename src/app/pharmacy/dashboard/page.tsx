@@ -63,6 +63,13 @@ export default function PharmacyDashboardPage() {
             }
             fetchedOrders.push(orderData);
         }
+        // Sort orders to show pending ones first
+        fetchedOrders.sort((a, b) => {
+            if (a.status === 'pending' && b.status !== 'pending') return -1;
+            if (a.status !== 'pending' && b.status === 'pending') return 1;
+            return b.createdAt.seconds - a.createdAt.seconds;
+        });
+
         setOrders(fetchedOrders);
         setIsLoading(false);
     }, (error) => {
@@ -115,15 +122,14 @@ export default function PharmacyDashboardPage() {
                                 <p className="text-sm flex items-center gap-2"><Calendar className="h-4 w-4 text-muted-foreground"/> Ordered on: {format(new Date(order.createdAt.seconds * 1000), 'PPP')}</p>
                             </div>
                             <div className="flex flex-col sm:items-end gap-2 w-full sm:w-auto">
-                                <Badge className="capitalize self-start sm:self-end">{order.status}</Badge>
+                                <Badge className="capitalize self-start sm:self-end" variant={order.status === 'pending' ? 'destructive' : 'default'}>{order.status}</Badge>
                                 <div className="flex gap-2 w-full">
-                                    <Button asChild className="flex-1">
+                                    <Button asChild className="flex-1" variant="outline">
                                         <Link href={`/patient/prescription/${order.prescriptionId}`}>
                                             <FileText className="mr-2 h-4 w-4"/> View Prescription
                                         </Link>
                                     </Button>
                                     <Button 
-                                        variant="outline"
                                         className="flex-1"
                                         onClick={() => handleFulfillOrder(order.id)}
                                         disabled={order.status !== 'pending' || updatingOrderId === order.id}
@@ -137,10 +143,16 @@ export default function PharmacyDashboardPage() {
                     ))}
                 </div>
             ) : (
-                 <p className="text-muted-foreground text-sm mt-2">No new prescriptions to fulfill at this time.</p>
+                 <div className="text-center py-12 text-muted-foreground">
+                    <Package className="h-12 w-12 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold">No New Orders</h3>
+                    <p>New prescription orders from patients will appear here.</p>
+                </div>
             )}
         </CardContent>
       </Card>
     </div>
   );
 }
+
+    
