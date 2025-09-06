@@ -24,8 +24,9 @@ interface Prescription {
 interface LabReport {
     id: string;
     name: string;
-    date: string;
+    date: { seconds: number, nanoseconds: number };
     labName: string;
+    patientId: string;
 }
 
 const PrescriptionRecordItem = ({ record }: { record: Prescription }) => {
@@ -58,7 +59,7 @@ const LabReportItem = ({ report }: { report: LabReport }) => {
                 <div>
                     <p className="font-semibold">{report.name}</p>
                     <p className="text-sm text-muted-foreground">
-                        From {report.labName} on {format(new Date(report.date), 'PPP')}
+                        From {report.labName} on {format(new Date(report.date.seconds * 1000), 'PPP')}
                     </p>
                 </div>
             </div>
@@ -73,11 +74,7 @@ const LabReportItem = ({ report }: { report: LabReport }) => {
 export default function MedicalRecords() {
     const { user, loading: authLoading } = useAuth();
     const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
-    const [labReports, setLabReports] = useState<LabReport[]>([
-        // Mock data for now
-        { id: '1', name: 'Complete Blood Count', date: '2023-10-15T10:00:00Z', labName: 'City Diagnostics' },
-        { id: '2', name: 'Lipid Profile', date: '2023-10-15T10:00:00Z', labName: 'City Diagnostics' },
-    ]);
+    const [labReports, setLabReports] = useState<LabReport[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -87,40 +84,71 @@ export default function MedicalRecords() {
             return;
         }
 
-        const q = query(
-            collection(db, "prescriptions"),
-            where("patientId", "==", user.uid),
-            orderBy("createdAt", "desc")
-        );
+        const fetchPrescriptions = () => {
+            const q = query(
+                collection(db, "prescriptions"),
+                where("patientId", "==", user.uid),
+                orderBy("createdAt", "desc")
+            );
 
-        const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-            const prescriptionsData: Prescription[] = [];
-            for (const docSnapshot of querySnapshot.docs) {
-                const data = docSnapshot.data();
-                const prescription: Prescription = {
-                    id: docSnapshot.id,
-                    diagnosis: data.diagnosis,
-                    doctorId: data.doctorId,
-                    createdAt: data.createdAt,
-                };
+            const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+                const prescriptionsData: Prescription[] = [];
+                for (const docSnapshot of querySnapshot.docs) {
+                    const data = docSnapshot.data();
+                    const prescription: Prescription = {
+                        id: docSnapshot.id,
+                        diagnosis: data.diagnosis,
+                        doctorId: data.doctorId,
+                        createdAt: data.createdAt,
+                    };
 
-                // Fetch doctor's name
-                const doctorDocRef = doc(db, 'doctors', data.doctorId);
-                const doctorDoc = await getDoc(doctorDocRef);
-                if (doctorDoc.exists()) {
-                    prescription.doctorName = doctorDoc.data().name;
+                    const doctorDocRef = doc(db, 'doctors', data.doctorId);
+                    const doctorDoc = await getDoc(doctorDocRef);
+                    if (doctorDoc.exists()) {
+                        prescription.doctorName = doctorDoc.data().name;
+                    }
+
+                    prescriptionsData.push(prescription);
                 }
+                setPrescriptions(prescriptionsData);
+                setIsLoading(false);
+            }, (error) => {
+                console.error("Error fetching prescriptions:", error);
+                setIsLoading(false);
+            });
+            return unsubscribe;
+        };
 
-                prescriptionsData.push(prescription);
-            }
-            setPrescriptions(prescriptionsData);
-            setIsLoading(false);
-        }, (error) => {
-            console.error("Error fetching prescriptions:", error);
-            setIsLoading(false);
-        });
+        const fetchLabReports = () => {
+            const q = query(
+                collection(db, "labreports"),
+                where("patientId", "==", user.uid),
+                orderBy("date", "desc")
+            );
 
-        return () => unsubscribe();
+             const unsubscribe = onSnapshot(q, (querySnapshot) => {
+                const reportsData: LabReport[] = [];
+                querySnapshot.forEach((doc) => {
+                    reportsData.push({ id: doc.id, ...doc.data() } as LabReport);
+                });
+                setLabReports(reportsData);
+                setIsLoading(false);
+            }, (error) => {
+                console.error("Error fetching lab reports:", error);
+                setIsLoading(false);
+            });
+            return unsubscribe;
+        };
+        
+        const unsubPrescriptions = fetchPrescriptions();
+        const unsubLabReports = fetchLabReports();
+
+
+        return () => {
+            if (unsubPrescriptions) unsubPrescriptions();
+            if (unsubLabReports) unsubLabReports();
+        };
+
     }, [user, authLoading]);
 
 
