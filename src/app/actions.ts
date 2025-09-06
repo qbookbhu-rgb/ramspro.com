@@ -59,7 +59,7 @@ export async function registerPatient(formData: any) {
 
 
 export async function registerDoctor(formData: any) {
-  const { name, mobile, email, specialization, qualification, registrationNumber, experience, consultationFee, bankDetails } = formData;
+  const { name, mobile, email, specialization, qualification, registrationNumber, experience, consultationFee, bankDetails, city } = formData;
   try {
     // In a real app, you'd create an auth user
     // and save this to a 'doctors' collection in Firestore after verification.
@@ -87,6 +87,7 @@ export async function registerDoctor(formData: any) {
       experience,
       consultationFee,
       bankDetails,
+      city,
       isVerified: true, // Auto-verified for demo purposes
       createdAt: new Date().toISOString(),
     });

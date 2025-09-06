@@ -44,6 +44,7 @@ const formSchema = z.object({
   bankDetails: z.string().min(10, "Please provide valid bank details for payouts."),
   clinicName: z.string().optional(),
   clinicAddress: z.string().optional(),
+  city: z.string().min(2, "City is required."),
 });
 
 export default function DoctorRegistrationPage() {
@@ -64,6 +65,7 @@ export default function DoctorRegistrationPage() {
         experience: 0,
         consultationFee: 500,
         bankDetails: "",
+        city: "",
     },
   });
 
@@ -118,6 +120,9 @@ export default function DoctorRegistrationPage() {
                     )}/>
                     <FormField name="email" control={form.control} render={({ field }) => (
                         <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input placeholder="e.g., john.doe@example.com" {...field} /></FormControl><FormMessage /></FormItem>
+                    )}/>
+                     <FormField name="city" control={form.control} render={({ field }) => (
+                        <FormItem><FormLabel>City</FormLabel><FormControl><Input placeholder="e.g., Mumbai" {...field} /></FormControl><FormMessage /></FormItem>
                     )}/>
                 </div>
               </section>

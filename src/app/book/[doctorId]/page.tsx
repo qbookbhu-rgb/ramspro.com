@@ -1,10 +1,10 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { notFound, useRouter } from 'next/navigation';
-import { doctors, consultationTypes } from "@/lib/data";
+import { consultationTypes } from "@/lib/data";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,42 +17,69 @@ import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp, doc, getDoc } from "firebase/firestore";
 import { useAuth } from "@/hooks/use-auth";
 
+interface Doctor {
+    uid: string;
+    name: string;
+    specialization: string;
+    city: string;
+    experience: number;
+    consultationFee: number;
+    image: string;
+    rating: number;
+    reviews: number;
+    dataAiHint: string;
+}
 
 export default function BookAppointmentPage({ params }: { params: { doctorId: string } }) {
     const { toast } = useToast();
     const router = useRouter();
     const { user } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
+    const [isFetchingDoctor, setIsFetchingDoctor] = useState(true);
 
-    // This finds the doctor from the static data.
-    // In a real app, you would fetch this from Firestore using the doctorId.
-    const doctor = doctors.find(d => d.id === params.doctorId);
-
+    const [doctor, setDoctor] = useState<Doctor | null>(null);
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
     const [selectedSlot, setSelectedSlot] = useState<string | undefined>();
-    const [selectedConsultation, setSelectedConsultation] = useState<string>(doctor?.availability === 'online' ? 'video' : 'in-clinic');
-    const [doctorUid, setDoctorUid] = useState<string | null>(null);
+    const [selectedConsultation, setSelectedConsultation] = useState<string>('video');
 
-    // This is a workaround to find the doctor's UID since we don't have it in the static data.
-    // In a real app, the `doctors` would be a Firestore collection and you'd query it directly.
     useEffect(() => {
-        const findDoctorUid = async () => {
-            if (doctor) {
-                // This is a placeholder for finding the doctor's real UID.
-                // For the demo, we assume we can find a doctor document that matches the name.
-                // This is not a robust solution for a production app.
-                // A better approach would be to have the UID in the initial doctor list.
-                // Since we don't have a `doctors` collection yet, this will fail gracefully.
-                // We will use the static ID as a fallback for the `doctorId` field.
+        const fetchDoctor = async () => {
+            setIsFetchingDoctor(true);
+            try {
+                const doctorDocRef = doc(db, 'doctors', params.doctorId);
+                const doctorDoc = await getDoc(doctorDocRef);
+
+                if (doctorDoc.exists()) {
+                    const data = doctorDoc.data();
+                    setDoctor({
+                        uid: doctorDoc.id,
+                        name: data.name,
+                        specialization: data.specialization,
+                        city: data.city || 'Unknown Location',
+                        experience: data.experience,
+                        consultationFee: data.consultationFee,
+                        image: `https://picsum.photos/600/400?random=${Math.random()}`,
+                        rating: 4.8, 
+                        reviews: 132,
+                        dataAiHint: 'doctor portrait',
+                    });
+                     // We assume online availability for now
+                    setSelectedConsultation('video');
+                } else {
+                    notFound();
+                }
+            } catch (error) {
+                console.error("Error fetching doctor:", error);
+                notFound();
+            } finally {
+                setIsFetchingDoctor(false);
             }
         };
-        findDoctorUid();
-    }, [doctor]);
 
-
-    if (!doctor) {
-        notFound();
-    }
+        if (params.doctorId) {
+            fetchDoctor();
+        }
+    }, [params.doctorId]);
 
     const timeSlots = ["10:00 AM", "11:00 AM", "12:00 PM", "02:00 PM", "03:00 PM", "04:00 PM"];
 
@@ -63,7 +90,7 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
                 title: "Not Logged In",
                 description: "You need to be logged in to book an appointment.",
             });
-            router.push('/register'); // Redirect to login/register
+            router.push('/register'); 
             return;
         }
 
@@ -75,29 +102,21 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
             });
             return;
         }
+        
+        if (!doctor) {
+             toast({
+                variant: "destructive",
+                title: "Doctor Not Found",
+                description: "Could not find doctor details. Please try again.",
+            });
+            return;
+        }
 
         setIsLoading(true);
 
         try {
-            // This is a placeholder logic. You should have a 'doctors' collection
-            // where each doctor document has a `uid` field.
-            // For now, we'll hardcode the UID for the first doctor for demonstration.
-            let targetDoctorId = doctor.id === '1' ? 'REPLACE_WITH_DOCTOR_1_UID' :
-                                 doctor.id === '2' ? 'REPLACE_WITH_DOCTOR_2_UID' :
-                                 doctor.id; // Fallback to static id
-
-             // A more robust way would be to query the 'doctors' collection by a unique field,
-             // e.g., their registration number, to get their UID. Since we don't have that yet,
-             // this logic is for demonstration.
-             // For the sake of the demo, let's just use the static doctor.id
-             // and assume it's the doctor's actual UID for now.
-             // You need to register doctors to get their UIDs.
-             // Let's assume the static doctor ID is the UID for now.
-             targetDoctorId = doctor.id;
-
-
             await addDoc(collection(db, "appointments"), {
-                doctorId: targetDoctorId,
+                doctorId: doctor.uid,
                 doctorName: doctor.name,
                 patientId: user.uid,
                 appointmentDate: selectedDate,
@@ -112,7 +131,6 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
                 description: `Your appointment with ${doctor.name} on ${selectedDate.toLocaleDateString()} at ${selectedSlot} is confirmed.`,
             });
 
-            // Redirect to dashboard after booking
             router.push('/patient/dashboard');
 
         } catch (error) {
@@ -127,6 +145,15 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
         }
     };
     
+     if (isFetchingDoctor) {
+        return <div className="container py-10 flex justify-center"><Loader2 className="h-16 w-16 animate-spin text-primary" /></div>;
+    }
+
+    if (!doctor) {
+        // This will be caught by notFound() in useEffect, but as a fallback
+        return <div className="container py-10 text-center"><h2>Doctor not found.</h2></div>
+    }
+
     return (
         <div className="container py-10">
              <Button variant="ghost" onClick={() => router.back()} className="mb-4">
@@ -150,7 +177,7 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
                         </CardHeader>
                         <CardContent className="p-6">
                             <CardTitle className="text-2xl font-headline">{doctor.name}</CardTitle>
-                            <CardDescription className="text-primary font-semibold text-lg">{doctor.specialty}</CardDescription>
+                            <p className="text-primary font-semibold text-lg">{doctor.specialization}</p>
                             
                              <div className="mt-4 flex items-center gap-1 text-md">
                                 <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
@@ -160,13 +187,13 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
 
                             <div className="mt-2 flex items-center gap-2 text-md text-muted-foreground">
                                 <MapPin className="h-5 w-5" />
-                                <span>{doctor.location}</span>
+                                <span>{doctor.city}</span>
                             </div>
 
                              <div className="mt-4 flex gap-2">
-                                <Badge variant={doctor.availability === 'online' ? 'secondary' : 'default'} className="flex items-center gap-1.5 whitespace-nowrap">
-                                    {doctor.availability === 'online' ? <Video className="h-3 w-3" /> : <Hospital className="h-3 w-3" />}
-                                    {doctor.availability === 'online' ? 'Online' : 'In-Clinic'}
+                                <Badge variant={'secondary'} className="flex items-center gap-1.5 whitespace-nowrap">
+                                    <Video className="h-3 w-3" />
+                                    Online
                                 </Badge>
                              </div>
                         </CardContent>
@@ -212,13 +239,13 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
                             <div>
                                 <h3 className="font-bold mb-4">Consultation Type</h3>
                                 <RadioGroup
-                                    defaultValue={selectedConsultation}
+                                    value={selectedConsultation}
                                     onValueChange={setSelectedConsultation}
                                     className="flex gap-4"
                                 >
                                     {consultationTypes.map(type => (
                                         <div key={type.name} className="flex items-center space-x-2">
-                                             <RadioGroupItem value={type.name.toLowerCase()} id={type.name.toLowerCase()} disabled={doctor.availability === 'online' && type.name === 'In-Clinic'} />
+                                             <RadioGroupItem value={type.name.toLowerCase()} id={type.name.toLowerCase()} disabled={type.name === 'In-Clinic'} />
                                              <Label htmlFor={type.name.toLowerCase()} className="flex items-center gap-2 cursor-pointer">
                                                 <type.icon className="h-4 w-4 text-muted-foreground" />
                                                 {type.name}
@@ -240,3 +267,4 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
         </div>
     );
 }
+
