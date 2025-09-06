@@ -21,7 +21,7 @@ export default async function LocaleLayout({
   children: React.ReactNode;
   params: {locale: string};
 }) {
-  const messages = await getMessages();
+  const messages = await getMessages({locale});
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -31,7 +31,7 @@ export default async function LocaleLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className={cn('min-h-screen bg-background font-body antialiased')}>
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
             <AuthProvider>
             <div className="relative flex min-h-dvh flex-col bg-background">
                 <Header />
