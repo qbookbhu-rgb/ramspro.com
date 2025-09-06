@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Languages, Menu, UserCircle, X, LogOut, Briefcase, Ambulance, Beaker, Pill } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { usePathname, useRouter } from 'next-intl/client';
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import { languages } from "@/lib/data";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { LoginDialog } from "./login-dialog";
 import { getUserRole } from "@/app/actions";
+import { useLocale } from "next-intl";
 
 const navLinks = [
   { href: "/#find-a-doctor", label: "Find a Doctor" },
@@ -30,6 +32,13 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const { user, signOut, loading, userRole } = useAuth();
+  const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const handleLocaleChange = (newLocale: string) => {
+    router.push(pathname, {locale: newLocale});
+  };
   
   const getInitials = (name?: string | null) => {
     if (!name) return "U";
@@ -69,7 +78,7 @@ export default function Header() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {languages.map((lang) => (
-                <DropdownMenuItem key={lang.code}>
+                <DropdownMenuItem key={lang.code} onSelect={() => handleLocaleChange(lang.code)}>
                   {lang.name}
                 </DropdownMenuItem>
               ))}

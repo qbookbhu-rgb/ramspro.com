@@ -13,6 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "@/component
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import type { AISymptomCheckerOutput } from "@/ai/flows/ai-symptom-checker";
+import { useTranslations } from 'next-intl';
 
 const FormSchema = z.object({
   symptoms: z.string().min(10, {
@@ -24,6 +25,7 @@ export default function HeroSection() {
   const [result, setResult] = useState<AISymptomCheckerOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const t = useTranslations('HeroSection');
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -54,12 +56,11 @@ export default function HeroSection() {
     <section className="container">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         <div className="text-center lg:text-left">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-headline tracking-tight">
-            Your Health, <br />
-            <span className="text-primary">Understood.</span>
-          </h1>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-headline tracking-tight"
+             dangerouslySetInnerHTML={{ __html: t.raw('title') }}
+          />
           <p className="mt-4 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0">
-            Feeling unwell? Describe your symptoms and our AI will suggest the right specialist for you.
+            {t('subtitle')}
           </p>
         </div>
 
@@ -70,8 +71,8 @@ export default function HeroSection() {
                 <Sparkles className="h-6 w-6" />
               </div>
               <div>
-                <CardTitle className="text-2xl font-headline">AI Symptom Checker</CardTitle>
-                <CardDescription>Don't know where to start? Let our AI guide you.</CardDescription>
+                <CardTitle className="text-2xl font-headline">{t('cardTitle')}</CardTitle>
+                <CardDescription>{t('cardDescription')}</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -85,7 +86,7 @@ export default function HeroSection() {
                     <FormItem>
                       <FormControl>
                         <Textarea
-                          placeholder="e.g., 'I have a persistent headache and feel dizzy...'"
+                          placeholder={t('symptomsPlaceholder')}
                           className="min-h-[100px] resize-none"
                           {...field}
                         />
@@ -100,7 +101,7 @@ export default function HeroSection() {
                   ) : (
                     <Sparkles className="mr-2 h-4 w-4" />
                   )}
-                  Analyze Symptoms
+                  {t('analyzeButton')}
                 </Button>
               </form>
             </Form>

@@ -1,0 +1,10 @@
+{
+  "HeroSection": {
+    "title": "Your Health, <br/> <span class='text-primary'>Understood.</span>",
+    "subtitle": "Feeling unwell? Describe your symptoms and our AI will suggest the right specialist for you.",
+    "cardTitle": "AI Symptom Checker",
+    "cardDescription": "Don't know where to start? Let our AI guide you.",
+    "symptomsPlaceholder": "e.g., 'I have a persistent headache and feel dizzy...'",
+    "analyzeButton": "Analyze Symptoms"
+  }
+}
