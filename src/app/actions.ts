@@ -3,6 +3,7 @@
 
 import { aiSymptomChecker, type AISymptomCheckerInput } from "@/ai/flows/ai-symptom-checker";
 import { aiPrescriptionAssistant, type AIPrescriptionAssistantInput } from "@/ai/flows/ai-prescription-assistant";
+import { findAmbulance } from "@/ai/flows/ai-find-ambulance";
 import { auth, db } from "@/lib/firebase-admin";
 import { collection, setDoc, doc, addDoc, getDoc, updateDoc } from "firebase-admin/firestore";
 
@@ -206,5 +207,15 @@ export async function updateUserProfile(uid: string, role: 'patient' | 'doctor',
   } catch (error: any) {
     console.error("Error updating user profile:", error);
     return { success: false, error: "Failed to update profile. Please try again." };
+  }
+}
+
+export async function findNearestAmbulance() {
+  try {
+    const result = await findAmbulance();
+    return { success: true, data: result };
+  } catch (error) {
+    console.error('Error finding ambulance:', error);
+    return { success: false, error: 'Could not find an ambulance at this time.' };
   }
 }
