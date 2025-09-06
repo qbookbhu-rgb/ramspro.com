@@ -332,4 +332,3 @@ export async function updateOrderStatus(orderId: string, status: 'fulfilled' | '
         return { success: false, error: 'Could not update the order status. Please try again.' };
     }
 }
-    
