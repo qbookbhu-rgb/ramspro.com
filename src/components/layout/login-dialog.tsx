@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -20,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2,LogIn } from "lucide-react";
+import { getUserRole } from "@/app/actions";
 
 interface LoginDialogProps {
     isOpen: boolean;
@@ -82,7 +84,18 @@ export function LoginDialog({ isOpen, onOpenChange }: LoginDialogProps) {
             description: "Welcome back!",
         });
         onOpenChange(false); // Close the dialog
-        router.push('/patient/dashboard');
+
+        // Check user role and redirect
+        const { role } = await getUserRole(result.user.uid);
+        if (role === 'patient') {
+            router.push('/patient/dashboard');
+        } else if (role === 'doctor') {
+            router.push('/doctor/dashboard');
+        } else {
+            // Default redirect if role is unknown or user is new
+            router.push('/'); 
+        }
+
     }).catch((error: any) => {
         console.error("OTP verification failed", error);
         toast({
@@ -165,5 +178,3 @@ export function LoginDialog({ isOpen, onOpenChange }: LoginDialogProps) {
   )
 
 }
-
-    

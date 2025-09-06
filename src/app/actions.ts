@@ -3,7 +3,7 @@
 
 import { aiSymptomChecker, type AISymptomCheckerInput } from "@/ai/flows/ai-symptom-checker";
 import { auth, db } from "@/lib/firebase-admin";
-import { collection, setDoc, doc, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, setDoc, doc, addDoc, serverTimestamp, getDoc } from "firebase/firestore";
 
 export async function getDoctorRecommendation(input: AISymptomCheckerInput) {
   try {
@@ -121,4 +121,25 @@ export async function createPrescription(values: any, appointment: any) {
         console.error('Error saving prescription:', error);
         return { success: false, error: 'Could not save the prescription. Please try again.' };
     }
+}
+
+export async function getUserRole(uid: string): Promise<{ role: 'patient' | 'doctor' | 'unknown' }> {
+  try {
+    const patientDocRef = doc(db, 'patients', uid);
+    const patientDoc = await getDoc(patientDocRef);
+    if (patientDoc.exists()) {
+      return { role: 'patient' };
+    }
+
+    const doctorDocRef = doc(db, 'doctors', uid);
+    const doctorDoc = await getDoc(doctorDocRef);
+    if (doctorDoc.exists()) {
+      return { role: 'doctor' };
+    }
+
+    return { role: 'unknown' };
+  } catch (error) {
+    console.error("Error getting user role:", error);
+    return { role: 'unknown' };
+  }
 }
