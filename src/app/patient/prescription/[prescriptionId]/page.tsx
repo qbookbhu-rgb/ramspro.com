@@ -204,5 +204,3 @@ export default function PrescriptionDetailPage({ params }: { params: { prescript
     </div>
   );
 }
-
-    
