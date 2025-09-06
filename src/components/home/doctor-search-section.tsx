@@ -7,12 +7,13 @@ import Link from "next/link";
 import { Search, MapPin, Star, Video, Hospital, Loader2 } from "lucide-react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { consultationTypes, specialties } from "@/lib/data";
+import { specialties } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { useTranslations } from "next-intl";
 
 interface Doctor {
     uid: string;
@@ -28,6 +29,7 @@ interface Doctor {
 }
 
 export default function DoctorSearchSection() {
+  const t = useTranslations('DoctorSearch');
   const [allDoctors, setAllDoctors] = useState<Doctor[]>([]);
   const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -97,9 +99,9 @@ export default function DoctorSearchSection() {
   return (
     <section id="find-a-doctor" className="container">
       <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold font-headline">Find a Doctor</h2>
+        <h2 className="text-3xl md:text-4xl font-bold font-headline">{t('title')}</h2>
         <p className="mt-2 text-muted-foreground md:text-lg max-w-2xl mx-auto">
-          Search for doctors by specialty, location, or consultation type.
+          {t('subtitle')}
         </p>
       </div>
 
@@ -109,7 +111,7 @@ export default function DoctorSearchSection() {
             <div className="relative lg:col-span-2">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input 
-                placeholder="Doctor name or specialty..." 
+                placeholder={t('searchPlaceholder')}
                 className="pl-10" 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -118,15 +120,15 @@ export default function DoctorSearchSection() {
             <div className="relative">
               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input 
-                placeholder="Location" 
+                placeholder={t('locationPlaceholder')}
                 className="pl-10" 
                 value={locationQuery}
                 onChange={(e) => setLocationQuery(e.target.value)}
               />
             </div>
-            <Select onValuechange={setSpecialtyQuery} value={specialtyQuery}>
+            <Select onValueChange={setSpecialtyQuery} value={specialtyQuery}>
               <SelectTrigger>
-                <SelectValue placeholder="Filter by Specialty" />
+                <SelectValue placeholder={t('specialtyPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                  <SelectItem value="All Specialties">All Specialties</SelectItem>

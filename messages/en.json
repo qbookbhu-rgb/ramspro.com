@@ -6,5 +6,50 @@
     "cardDescription": "Don't know where to start? Let our AI guide you.",
     "symptomsPlaceholder": "e.g., 'I have a persistent headache and feel dizzy...'",
     "analyzeButton": "Analyze Symptoms"
+  },
+  "Header": {
+    "findDoctor": "Find a Doctor",
+    "wellness": "Wellness",
+    "forDoctors": "For Doctors"
+  },
+  "Footer": {
+    "company": "Company",
+    "aboutUs": "About Us",
+    "careers": "Careers",
+    "press": "Press",
+    "forDoctors": "For Doctors",
+    "resources": "Resources",
+    "blog": "Blog",
+    "helpCenter": "Help Center",
+    "contactUs": "Contact Us",
+    "privacyPolicy": "Privacy Policy",
+    "services": "Services",
+    "aiChecker": "AI Checker",
+    "findDoctor": "Find a Doctor",
+    "wellness": "Wellness",
+    "emergency": "Emergency",
+    "tagline": "Your health companion.",
+    "copyright": "© {year} RAMS.com. All rights reserved."
+  },
+  "HowItWorks": {
+    "title": "How It Works",
+    "subtitle": "Get expert medical care in three simple steps.",
+    "step1Title": "Find Your Doctor",
+    "step1Description": "Search by specialty or symptoms to find the right doctor for you.",
+    "step2Title": "Book an Appointment",
+    "step2Description": "Choose a convenient time and book a video, audio, or in-clinic visit.",
+    "step3Title": "Consult Online",
+    "step3Description": "Connect with your doctor from the comfort of your home."
+  },
+  "DoctorSearch": {
+    "title": "Find a Doctor",
+    "subtitle": "Search for doctors by specialty, location, or consultation type.",
+    "searchPlaceholder": "Doctor name or specialty...",
+    "locationPlaceholder": "Location",
+    "specialtyPlaceholder": "Filter by Specialty"
+  },
+  "Specialties": {
+    "title": "Browse by Specialty",
+    "subtitle": "Find the right specialist from our wide range of medical fields."
   }
 }

@@ -1,15 +1,19 @@
+
 import Link from "next/link";
 import { specialties } from "@/lib/data";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { getTranslations } from "next-intl/server";
 
-export default function SpecialtiesSection() {
+export default async function SpecialtiesSection() {
+  const t = await getTranslations('Specialties');
+
   return (
     <section className="container">
       <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold font-headline">Browse by Specialty</h2>
+        <h2 className="text-3xl md:text-4xl font-bold font-headline">{t('title')}</h2>
         <p className="mt-2 text-muted-foreground md:text-lg max-w-2xl mx-auto">
-          Find the right specialist from our wide range of medical fields.
+          {t('subtitle')}
         </p>
       </div>
 
