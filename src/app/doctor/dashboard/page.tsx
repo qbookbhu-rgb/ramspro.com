@@ -29,9 +29,8 @@ export default function DoctorDashboardPage() {
     }
 
     const fetchDoctorData = async () => {
+      setLoading(true);
       try {
-        // Assuming doctor data is stored in a 'doctors' collection
-        // You might need to adjust this based on your actual Firestore structure
         const doctorDocRef = doc(db, 'doctors', user.uid);
         const doctorDoc = await getDoc(doctorDocRef);
 
@@ -41,17 +40,14 @@ export default function DoctorDashboardPage() {
             name: data.name,
           });
         } else {
-          // Fallback or check other collections if needed
-          const patientDocRef = doc(db, 'patients', user.uid);
-          const patientDoc = await getDoc(patientDocRef);
-           if (!patientDoc.exists()){
-             console.error("No doctor data found for this user.");
-             // If no data found at all, maybe redirect to a role selection or home
-             router.push('/register/doctor');
-           }
+          console.error("User is not a doctor. Redirecting...");
+          // If the user document doesn't exist in the 'doctors' collection,
+          // they are not a doctor. Redirect them away.
+          router.push('/patient/dashboard'); // or to a generic home page
         }
       } catch (error) {
         console.error("Error fetching doctor data:", error);
+         router.push('/'); // Redirect on error
       } finally {
         setLoading(false);
       }
@@ -64,6 +60,14 @@ export default function DoctorDashboardPage() {
     return (
       <div className="container py-10 flex justify-center items-center h-[60vh]">
         <Loader2 className="h-16 w-16 animate-spin text-primary" />
+      </div>
+    );
+  }
+  
+  if (!doctorData) {
+     return (
+      <div className="container py-10 flex justify-center items-center h-[60vh]">
+        <p>Redirecting...</p>
       </div>
     );
   }
