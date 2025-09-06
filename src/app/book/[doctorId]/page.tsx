@@ -16,6 +16,7 @@ import { Star, MapPin, Video, Hospital, Calendar as CalendarIcon, Clock, ArrowLe
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp, doc, getDoc } from "firebase/firestore";
 import { useAuth } from "@/hooks/use-auth";
+import { cn } from "@/lib/utils";
 
 interface Doctor {
     uid: string;

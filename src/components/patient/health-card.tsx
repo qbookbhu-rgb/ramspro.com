@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,7 +31,7 @@ export function HealthCard({ patient }: HealthCardProps) {
                         <QrCode className="h-16 w-16 text-foreground" />
                     </div>
                     <div>
-                        <p className="font-bold text-lg text-primary-foreground">{patient.name}</p>
+                        <p className="font-bold text-xl text-primary-foreground">{patient.name}</p>
                         <p className="text-sm text-muted-foreground font-mono">{patient.patientId}</p>
                     </div>
                 </div>
