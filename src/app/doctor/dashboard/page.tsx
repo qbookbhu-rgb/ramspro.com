@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, LayoutDashboard, Loader2, User } from "lucide-react";
 import UpcomingAppointments from "@/components/doctor/upcoming-appointments";
+import DashboardAnalytics from "@/components/doctor/dashboard-analytics";
 
 interface DoctorData {
   name: string;
@@ -79,8 +80,8 @@ export default function DoctorDashboardPage() {
         <p className="text-muted-foreground">This is your professional dashboard.</p>
       </div>
       
-      <Tabs defaultValue="appointments">
-        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 mb-8 h-auto">
+      <Tabs defaultValue="dashboard">
+        <TabsList className="grid w-full grid-cols-2 mb-8 h-auto">
           <TabsTrigger value="dashboard" className="py-2">
             <LayoutDashboard className="mr-2" />
             Dashboard
@@ -92,7 +93,7 @@ export default function DoctorDashboardPage() {
         </TabsList>
 
         <TabsContent value="dashboard">
-            <p>Analytics and overview will be shown here.</p>
+            <DashboardAnalytics />
         </TabsContent>
         <TabsContent value="appointments">
            <div className="space-y-8">
