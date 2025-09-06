@@ -7,9 +7,11 @@ import { db } from "@/lib/firebase";
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, Clock, Hospital, User, Video } from "lucide-react";
+import { Calendar, Clock, Hospital, User, Video, FilePlus2 } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { format } from 'date-fns';
+import { Button } from "../ui/button";
+import Link from "next/link";
 
 interface Appointment {
     id: string;
@@ -34,9 +36,6 @@ export default function UpcomingAppointments() {
             return;
         }
 
-        // We need to find the doctor's ID from our 'doctors' collection in lib/data.ts
-        // In a real app, you'd likely have the doctor's own ID from their profile.
-        // For this demo, let's assume the doctor's name is unique and in their auth profile.
         const doctorId = user.uid; // Use UID as the doctorId
 
         const q = query(
@@ -85,30 +84,40 @@ export default function UpcomingAppointments() {
             <CardContent>
                 {isLoading || authLoading ? (
                     <div className="space-y-4">
-                        <Skeleton className="h-24 w-full" />
-                        <Skeleton className="h-24 w-full" />
+                        <Skeleton className="h-28 w-full" />
+                        <Skeleton className="h-28 w-full" />
                     </div>
                 ) : appointments.length > 0 ? (
                     <div className="space-y-4">
                         {appointments.map(app => (
-                            <div key={app.id} className="border p-4 rounded-lg flex flex-col sm:flex-row justify-between items-start gap-4">
-                                <div className="flex-1">
-                                    <p className="font-bold flex items-center gap-2"><User className="h-4 w-4 text-primary" /> {app.patientName}</p>
-                                    <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
-                                        <Calendar className="h-4 w-4" /> 
-                                        {format(new Date(app.appointmentDate.seconds * 1000), 'PPP')}
-                                    </p>
-                                    <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
-                                        <Clock className="h-4 w-4" />
-                                        {app.appointmentTime}
-                                    </p>
+                            <div key={app.id} className="border p-4 rounded-lg flex flex-col gap-4">
+                                <div className="flex justify-between items-start">
+                                    <div className="flex-1">
+                                        <p className="font-bold flex items-center gap-2"><User className="h-4 w-4 text-primary" /> {app.patientName}</p>
+                                        <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                                            <Calendar className="h-4 w-4" /> 
+                                            {format(new Date(app.appointmentDate.seconds * 1000), 'PPP')}
+                                        </p>
+                                        <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                                            <Clock className="h-4 w-4" />
+                                            {app.appointmentTime}
+                                        </p>
+                                    </div>
+                                    <div className="flex flex-col items-end gap-2">
+                                        <Badge variant={app.consultationType === 'video' ? 'secondary' : 'default'} className="flex items-center gap-1.5 whitespace-nowrap">
+                                            {app.consultationType === 'video' ? <Video className="h-3 w-3" /> : <Hospital className="h-3 w-3" />}
+                                            {app.consultationType.charAt(0).toUpperCase() + app.consultationType.slice(1)}
+                                        </Badge>
+                                        <Badge variant={app.status === 'confirmed' ? 'default' : 'destructive'} className="capitalize">{app.status}</Badge>
+                                    </div>
                                 </div>
-                                <div className="flex flex-col items-end gap-2">
-                                     <Badge variant={app.consultationType === 'video' ? 'secondary' : 'default'} className="flex items-center gap-1.5 whitespace-nowrap">
-                                        {app.consultationType === 'video' ? <Video className="h-3 w-3" /> : <Hospital className="h-3 w-3" />}
-                                        {app.consultationType.charAt(0).toUpperCase() + app.consultationType.slice(1)}
-                                    </Badge>
-                                    <Badge variant={app.status === 'confirmed' ? 'default' : 'destructive'} className="capitalize">{app.status}</Badge>
+                                <div className="border-t pt-4 flex justify-end">
+                                     <Button asChild>
+                                        <Link href={`/doctor/create-prescription/${app.id}`}>
+                                            <FilePlus2 className="mr-2 h-4 w-4"/>
+                                            Create E-Prescription
+                                        </Link>
+                                     </Button>
                                 </div>
                             </div>
                         ))}
