@@ -2,12 +2,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { collection, query, where, onSnapshot, orderBy, getDoc, doc } from "firebase/firestore";
+import { collection, query, where, onSnapshot, orderBy, getDoc, doc, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, Clock, Hospital, User, Video, FilePlus2 } from "lucide-react";
+import { Calendar, Clock, Hospital, User, Video, FilePlus2, FileSearch } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { format } from 'date-fns';
 import { Button } from "../ui/button";
@@ -22,7 +22,8 @@ interface Appointment {
     appointmentTime: string;
     consultationType: string;
     status: string;
-    patientName?: string; // Add patient name field
+    patientName?: string;
+    prescriptionId?: string | null; // To hold the ID of the existing prescription
 }
 
 export default function UpcomingAppointments() {
@@ -36,7 +37,7 @@ export default function UpcomingAppointments() {
             return;
         }
 
-        const doctorId = user.uid; // Use UID as the doctorId
+        const doctorId = user.uid;
 
         const q = query(
             collection(db, "appointments"), 
@@ -61,6 +62,24 @@ export default function UpcomingAppointments() {
                 } catch (e) {
                     console.error("Error fetching patient name:", e);
                     appointmentData.patientName = 'Error fetching name';
+                }
+
+                // Check for existing prescription
+                try {
+                    const prescriptionQuery = query(
+                        collection(db, 'prescriptions'),
+                        where('appointmentId', '==', appointmentData.id)
+                    );
+                    const prescriptionSnapshot = await getDocs(prescriptionQuery);
+                    if (!prescriptionSnapshot.empty) {
+                        // Assuming one prescription per appointment
+                        appointmentData.prescriptionId = prescriptionSnapshot.docs[0].id;
+                    } else {
+                        appointmentData.prescriptionId = null;
+                    }
+                } catch (e) {
+                     console.error("Error checking for prescription:", e);
+                     appointmentData.prescriptionId = null;
                 }
 
                 newAppointments.push(appointmentData);
@@ -112,12 +131,21 @@ export default function UpcomingAppointments() {
                                     </div>
                                 </div>
                                 <div className="border-t pt-4 flex justify-end">
-                                     <Button asChild>
-                                        <Link href={`/doctor/create-prescription/${app.id}`}>
-                                            <FilePlus2 className="mr-2 h-4 w-4"/>
-                                            Create E-Prescription
-                                        </Link>
-                                     </Button>
+                                     {app.prescriptionId ? (
+                                        <Button asChild variant="outline">
+                                            <Link href={`/patient/prescription/${app.prescriptionId}`}>
+                                                <FileSearch className="mr-2 h-4 w-4"/>
+                                                View Prescription
+                                            </Link>
+                                        </Button>
+                                     ) : (
+                                        <Button asChild>
+                                            <Link href={`/doctor/create-prescription/${app.id}`}>
+                                                <FilePlus2 className="mr-2 h-4 w-4"/>
+                                                Create E-Prescription
+                                            </Link>
+                                        </Button>
+                                     )}
                                 </div>
                             </div>
                         ))}
