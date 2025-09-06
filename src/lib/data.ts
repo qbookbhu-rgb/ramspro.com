@@ -1,14 +1,17 @@
 
 import type { SVGProps } from 'react';
-import { Stethoscope, HeartPulse, Brain, Bone, Baby, Eye, Search, Calendar, MessageSquare, HeartHandshake, Dumbbell, Smile, Grape, Siren, Video, Phone, Hospital, User, Pill, FlaskConical, Ambulance, Sparkles, Briefcase, Building } from 'lucide-react';
+import { Stethoscope, HeartPulse, Brain, Bone, Baby, Eye, Search, Calendar, MessageSquare, HeartHandshake, Dumbbell, Smile, Grape, Siren, Video, Phone, Hospital, User, Pill, FlaskConical, Ambulance, Sparkles, Briefcase, Building, Ear, Shield, Leaf } from 'lucide-react';
 
 export const specialties = [
+    { name: 'General Medicine', icon: Stethoscope },
     { name: 'Cardiology', icon: HeartPulse },
     { name: 'Neurology', icon: Brain },
     { name: 'Orthopedics', icon: Bone },
     { name: 'Pediatrics', icon: Baby },
     { name: 'Ophthalmology', icon: Eye },
-    { name: 'General Medicine', icon: Stethoscope },
+    { name: 'Dermatology', icon: Shield },
+    { name: 'ENT', icon: Ear },
+    { name: 'Ayurveda', icon: Leaf },
 ];
 
 export const howItWorksSteps = [
