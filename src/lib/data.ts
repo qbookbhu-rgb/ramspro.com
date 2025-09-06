@@ -1,6 +1,6 @@
 
 import type { SVGProps } from 'react';
-import { Stethoscope, HeartPulse, Brain, Bone, Baby, Eye, Search, Calendar, MessageSquare, HeartHandshake, Dumbbell, Smile, Grape, Siren, Video, Phone, Hospital, User, Pill, FlaskConical, Ambulance, Sparkles, Briefcase, Building, Ear, Shield, Leaf } from 'lucide-react';
+import { Stethoscope, HeartPulse, Brain, Bone, Baby, Eye, Search, Calendar, MessageSquare, HeartHandshake, Dumbbell, Smile, Grape, Siren, Video, Phone, Hospital, User, Pill, FlaskConical, Ambulance, Sparkles, Briefcase, Building, Ear, Shield, Leaf, Beaker } from 'lucide-react';
 
 export const specialties = [
     { name: 'General Medicine', icon: Stethoscope },
@@ -80,5 +80,5 @@ export const registrationRoles = [
     { name: 'Doctor / Clinic', href: '/register/doctor', icon: Stethoscope, description: 'Provide consultations or register your clinic.', disabled: false },
     { name: 'Ambulance', href: '/register/ambulance', icon: Ambulance, description: 'Provide emergency transport services.', disabled: false },
     { name: 'Pharmacy', href: '#', icon: Pill, description: 'Manage orders and sell medicines.', disabled: true },
-    { name: 'Lab / Diagnostics', href: '#', icon: FlaskConical, description: 'Manage test bookings and reports.', disabled: true },
+    { name: 'Lab / Diagnostics', href: '/register/lab', icon: Beaker, description: 'Manage test bookings and reports.', disabled: false },
 ];

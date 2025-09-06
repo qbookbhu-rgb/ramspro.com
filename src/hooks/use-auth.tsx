@@ -13,7 +13,7 @@ import { onAuthStateChanged, signOut as firebaseSignOut, type User } from "fireb
 import { auth } from "@/lib/firebase";
 import { getUserRole } from "@/app/actions";
 
-type UserRole = 'patient' | 'doctor' | 'ambulance' | 'unknown';
+type UserRole = 'patient' | 'doctor' | 'ambulance' | 'lab' | 'unknown';
 
 interface AuthContextType {
     user: User | null;

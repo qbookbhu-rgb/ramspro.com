@@ -145,6 +145,42 @@ export async function registerAmbulance(uid: string, formData: any) {
   }
 }
 
+export async function registerLab(uid: string, formData: any) {
+  const { labName, mobile, email, address, city, services } = formData;
+  try {
+    await auth.updateUser(uid, {
+      displayName: labName,
+      email: email,
+    });
+
+    const labId = `RAMS-L-${Date.now()}`;
+
+    await setDoc(doc(db, 'labs', uid), {
+      uid: uid,
+      labId,
+      labName,
+      mobile,
+      email,
+      address,
+      city,
+      services,
+      createdAt: new Date().toISOString(),
+    });
+
+    return { success: true, data: { message: "Lab registration successful." } };
+  } catch (error: any) {
+    console.error("Lab Registration Error:", error);
+    let errorMessage = "An unexpected error occurred during registration. Please try again.";
+     if (error.code === 'auth/email-already-exists') {
+      errorMessage = "This email address is already in use by another account.";
+    } else if (error.code === 'auth/phone-number-already-exists') {
+      errorMessage = "This phone number is already in use by another account.";
+    }
+    return { success: false, error: errorMessage };
+  }
+}
+
+
 export async function createPrescription(values: any, appointment: any) {
     try {
         await addDoc(collection(db, 'prescriptions'), {
@@ -163,7 +199,7 @@ export async function createPrescription(values: any, appointment: any) {
     }
 }
 
-export async function getUserRole(uid: string): Promise<{ role: 'patient' | 'doctor' | 'ambulance' | 'unknown'; data: any | null }> {
+export async function getUserRole(uid: string): Promise<{ role: 'patient' | 'doctor' | 'ambulance' | 'lab' | 'unknown'; data: any | null }> {
   if (!uid) {
     return { role: 'unknown', data: null };
   }
@@ -184,6 +220,12 @@ export async function getUserRole(uid: string): Promise<{ role: 'patient' | 'doc
     const ambulanceDoc = await getDoc(ambulanceDocRef);
     if (ambulanceDoc.exists()) {
       return { role: 'ambulance', data: ambulanceDoc.data() };
+    }
+
+    const labDocRef = doc(db, 'labs', uid);
+    const labDoc = await getDoc(labDocRef);
+    if (labDoc.exists()) {
+      return { role: 'lab', data: labDoc.data() };
     }
 
     return { role: 'unknown', data: null };
