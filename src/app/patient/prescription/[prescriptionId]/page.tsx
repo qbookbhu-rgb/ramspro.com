@@ -2,13 +2,14 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { notFound, useRouter } from 'next/navigation';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/hooks/use-auth';
 import { format } from 'date-fns';
 import { Loader2, ArrowLeft, User, Stethoscope, Calendar, Pill } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -191,6 +192,14 @@ export default function PrescriptionDetailPage({ params }: { params: { prescript
                 )}
             </div>
         </CardContent>
+        <CardFooter className="flex justify-end">
+            <Button asChild>
+                <Link href={`/order/${prescription.id}`}>
+                    <Pill className="mr-2 h-4 w-4" />
+                    Order Medicines
+                </Link>
+            </Button>
+        </CardFooter>
       </Card>
     </div>
   );

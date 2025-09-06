@@ -5,7 +5,7 @@ import { aiSymptomChecker, type AISymptomCheckerInput } from "@/ai/flows/ai-symp
 import { aiPrescriptionAssistant, type AIPrescriptionAssistantInput } from "@/ai/flows/ai-prescription-assistant";
 import { findAmbulance } from "@/ai/flows/ai-find-ambulance";
 import { auth, db } from "@/lib/firebase-admin";
-import { collection, setDoc, doc, addDoc, getDoc, updateDoc } from "firebase-admin/firestore";
+import { collection, setDoc, doc, addDoc, getDoc, updateDoc, serverTimestamp } from "firebase-admin/firestore";
 
 export async function getDoctorRecommendation(input: AISymptomCheckerInput) {
   try {
@@ -301,4 +301,20 @@ export async function findNearestAmbulance() {
     console.error('Error finding ambulance:', error);
     return { success: false, error: 'Could not find an ambulance at this time.' };
   }
+}
+
+export async function createOrder(pharmacyId: string, prescriptionId: string, patientId: string) {
+    try {
+        await addDoc(collection(db, 'orders'), {
+            pharmacyId,
+            prescriptionId,
+            patientId,
+            status: 'pending',
+            createdAt: serverTimestamp(),
+        });
+        return { success: true, message: 'Order placed successfully!' };
+    } catch (error) {
+        console.error('Error creating order:', error);
+        return { success: false, error: 'Could not place the order. Please try again.' };
+    }
 }
