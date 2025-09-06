@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Languages, Menu, UserCircle, X, LogOut, Briefcase, Ambulance, Beaker } from "lucide-react";
+import { Languages, Menu, UserCircle, X, LogOut, Briefcase, Ambulance, Beaker, Pill } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 import { cn } from "@/lib/utils";
@@ -116,6 +116,14 @@ export default function Header() {
                     <Link href="/lab/dashboard">
                       <Beaker className="mr-2" />
                       Lab Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                { userRole === 'pharmacy' && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/pharmacy/dashboard">
+                      <Pill className="mr-2" />
+                      Pharmacy Dashboard
                     </Link>
                   </DropdownMenuItem>
                 )}

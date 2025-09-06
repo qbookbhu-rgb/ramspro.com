@@ -180,6 +180,41 @@ export async function registerLab(uid: string, formData: any) {
   }
 }
 
+export async function registerPharmacy(uid: string, formData: any) {
+  const { pharmacyName, mobile, email, address, city, licenseNumber } = formData;
+  try {
+    await auth.updateUser(uid, {
+      displayName: pharmacyName,
+      email: email,
+    });
+
+    const pharmacyId = `RAMS-PH-${Date.now()}`;
+
+    await setDoc(doc(db, 'pharmacies', uid), {
+      uid: uid,
+      pharmacyId,
+      pharmacyName,
+      mobile,
+      email,
+      address,
+      city,
+      licenseNumber,
+      createdAt: new Date().toISOString(),
+    });
+
+    return { success: true, data: { message: "Pharmacy registration successful." } };
+  } catch (error: any) {
+    console.error("Pharmacy Registration Error:", error);
+    let errorMessage = "An unexpected error occurred during registration. Please try again.";
+     if (error.code === 'auth/email-already-exists') {
+      errorMessage = "This email address is already in use by another account.";
+    } else if (error.code === 'auth/phone-number-already-exists') {
+      errorMessage = "This phone number is already in use by another account.";
+    }
+    return { success: false, error: errorMessage };
+  }
+}
+
 
 export async function createPrescription(values: any, appointment: any) {
     try {
@@ -199,7 +234,7 @@ export async function createPrescription(values: any, appointment: any) {
     }
 }
 
-export async function getUserRole(uid: string): Promise<{ role: 'patient' | 'doctor' | 'ambulance' | 'lab' | 'unknown'; data: any | null }> {
+export async function getUserRole(uid: string): Promise<{ role: 'patient' | 'doctor' | 'ambulance' | 'lab' | 'pharmacy' | 'unknown'; data: any | null }> {
   if (!uid) {
     return { role: 'unknown', data: null };
   }
@@ -226,6 +261,12 @@ export async function getUserRole(uid: string): Promise<{ role: 'patient' | 'doc
     const labDoc = await getDoc(labDocRef);
     if (labDoc.exists()) {
       return { role: 'lab', data: labDoc.data() };
+    }
+
+    const pharmacyDocRef = doc(db, 'pharmacies', uid);
+    const pharmacyDoc = await getDoc(pharmacyDocRef);
+    if (pharmacyDoc.exists()) {
+      return { role: 'pharmacy', data: pharmacyDoc.data() };
     }
 
     return { role: 'unknown', data: null };

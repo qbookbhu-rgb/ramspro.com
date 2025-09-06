@@ -99,6 +99,8 @@ export function LoginDialog({ isOpen, onOpenChange }: LoginDialogProps) {
             router.push('/ambulance/dashboard');
         } else if (role === 'lab') {
             router.push('/lab/dashboard');
+        } else if (role === 'pharmacy') {
+            router.push('/pharmacy/dashboard');
         } else {
             // Default redirect if role is unknown or user is new
             // This might happen if they log in but haven't completed registration
