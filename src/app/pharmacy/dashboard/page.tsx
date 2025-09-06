@@ -12,6 +12,8 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { updateOrderStatus } from "@/app/actions";
 
 interface Order {
     id: string;
@@ -27,8 +29,10 @@ interface Order {
 export default function PharmacyDashboardPage() {
   const { user, userData, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -68,6 +72,17 @@ export default function PharmacyDashboardPage() {
 
     return () => unsubscribe();
   }, [user, authLoading, router]);
+  
+  const handleFulfillOrder = async (orderId: string) => {
+    setUpdatingOrderId(orderId);
+    const result = await updateOrderStatus(orderId, 'fulfilled');
+    if (result.success) {
+        toast({ title: "Order Fulfilled", description: "The order has been marked as fulfilled." });
+    } else {
+        toast({ variant: "destructive", title: "Update Failed", description: result.error });
+    }
+    setUpdatingOrderId(null);
+  }
 
   if (authLoading || !userData || isLoading) {
     return (
@@ -107,7 +122,15 @@ export default function PharmacyDashboardPage() {
                                             <FileText className="mr-2 h-4 w-4"/> View Prescription
                                         </Link>
                                     </Button>
-                                    <Button variant="outline" className="flex-1">Fulfill Order</Button>
+                                    <Button 
+                                        variant="outline"
+                                        className="flex-1"
+                                        onClick={() => handleFulfillOrder(order.id)}
+                                        disabled={order.status !== 'pending' || updatingOrderId === order.id}
+                                    >
+                                        {updatingOrderId === order.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}
+                                        {order.status === 'pending' ? 'Fulfill Order' : 'Fulfilled'}
+                                    </Button>
                                 </div>
                             </div>
                         </div>

@@ -319,4 +319,17 @@ export async function createOrder(pharmacyId: string, prescriptionId: string, pa
     }
 }
 
+export async function updateOrderStatus(orderId: string, status: 'fulfilled' | 'cancelled') {
+    try {
+        const orderRef = doc(db, 'orders', orderId);
+        await updateDoc(orderRef, {
+            status: status,
+            updatedAt: serverTimestamp(),
+        });
+        return { success: true, message: 'Order status updated successfully.' };
+    } catch (error) {
+        console.error('Error updating order status:', error);
+        return { success: false, error: 'Could not update the order status. Please try again.' };
+    }
+}
     
