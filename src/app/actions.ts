@@ -113,6 +113,37 @@ export async function registerDoctor(uid: string, formData: any) {
   }
 }
 
+export async function registerAmbulance(uid: string, formData: any) {
+  const { driverName, vehicleNumber, mobile, city } = formData;
+  try {
+    await auth.updateUser(uid, {
+      displayName: driverName,
+    });
+
+    const ambulanceId = `RAMS-A-${Date.now()}`;
+
+    await setDoc(doc(db, 'ambulances', uid), {
+      uid: uid,
+      ambulanceId,
+      driverName,
+      vehicleNumber,
+      mobile,
+      city,
+      isAvailable: true,
+      createdAt: new Date().toISOString(),
+    });
+
+    return { success: true, data: { message: "Ambulance registration successful." } };
+  } catch (error: any) {
+    console.error("Ambulance Registration Error:", error);
+    let errorMessage = "An unexpected error occurred during registration. Please try again.";
+    if (error.code === 'auth/phone-number-already-exists') {
+      errorMessage = "This phone number is already in use by another account.";
+    }
+    return { success: false, error: errorMessage };
+  }
+}
+
 export async function createPrescription(values: any, appointment: any) {
     try {
         await addDoc(collection(db, 'prescriptions'), {
@@ -131,7 +162,7 @@ export async function createPrescription(values: any, appointment: any) {
     }
 }
 
-export async function getUserRole(uid: string): Promise<{ role: 'patient' | 'doctor' | 'unknown'; data: any | null }> {
+export async function getUserRole(uid: string): Promise<{ role: 'patient' | 'doctor' | 'ambulance' | 'unknown'; data: any | null }> {
   if (!uid) {
     return { role: 'unknown', data: null };
   }
@@ -146,6 +177,12 @@ export async function getUserRole(uid: string): Promise<{ role: 'patient' | 'doc
     const doctorDoc = await getDoc(doctorDocRef);
     if (doctorDoc.exists()) {
       return { role: 'doctor', data: doctorDoc.data() };
+    }
+
+    const ambulanceDocRef = doc(db, 'ambulances', uid);
+    const ambulanceDoc = await getDoc(ambulanceDocRef);
+    if (ambulanceDoc.exists()) {
+      return { role: 'ambulance', data: ambulanceDoc.data() };
     }
 
     return { role: 'unknown', data: null };

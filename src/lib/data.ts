@@ -78,7 +78,7 @@ export const languages = [
 export const registrationRoles = [
     { name: 'Patient', href: '/register/patient', icon: User, description: 'Book appointments and manage your health.', disabled: false },
     { name: 'Doctor / Clinic', href: '/register/doctor', icon: Stethoscope, description: 'Provide consultations or register your clinic.', disabled: false },
+    { name: 'Ambulance', href: '/register/ambulance', icon: Ambulance, description: 'Provide emergency transport services.', disabled: false },
     { name: 'Pharmacy', href: '#', icon: Pill, description: 'Manage orders and sell medicines.', disabled: true },
     { name: 'Lab / Diagnostics', href: '#', icon: FlaskConical, description: 'Manage test bookings and reports.', disabled: true },
-    { name: 'Ambulance', href: '#', icon: Ambulance, description: 'Provide emergency transport services.', disabled: true },
 ];

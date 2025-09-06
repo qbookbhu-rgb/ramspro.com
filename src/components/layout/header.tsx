@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Languages, Menu, UserCircle, X, LogOut, Briefcase } from "lucide-react";
+import { Languages, Menu, UserCircle, X, LogOut, Briefcase, Ambulance } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 import { cn } from "@/lib/utils";
@@ -100,6 +100,14 @@ export default function Header() {
                     <Link href="/doctor/dashboard">
                       <Briefcase className="mr-2" />
                       Doctor Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                { userRole === 'ambulance' && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/ambulance/dashboard">
+                      <Ambulance className="mr-2" />
+                      Ambulance Dashboard
                     </Link>
                   </DropdownMenuItem>
                 )}
