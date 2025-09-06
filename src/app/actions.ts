@@ -69,7 +69,7 @@ export async function registerPatient(uid: string, formData: any) {
 
 
 export async function registerDoctor(uid: string, formData: any) {
-  const { name, mobile, email, specialization, qualification, registrationNumber, experience, consultationFee, bankDetails, city } = formData;
+  const { name, mobile, email, specialization, qualification, registrationNumber, experience, consultationFee, bankDetails, city, profileType, clinicName, clinicAddress } = formData;
   try {
     // User is already created via OTP, so we just update the display name and email
     await auth.updateUser(uid, {
@@ -92,6 +92,9 @@ export async function registerDoctor(uid: string, formData: any) {
       consultationFee,
       bankDetails,
       city,
+      profileType,
+      clinicName: clinicName || null,
+      clinicAddress: clinicAddress || null,
       isVerified: true, // Auto-verified for demo purposes
       createdAt: new Date().toISOString(),
     });

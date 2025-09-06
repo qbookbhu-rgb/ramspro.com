@@ -276,4 +276,3 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
         </div>
     );
 }
-
