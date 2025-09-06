@@ -85,7 +85,7 @@ export default function DoctorSearchSection() {
         );
     }
     
-    if (specialtyQuery) {
+    if (specialtyQuery && specialtyQuery !== "All Specialties") {
         doctors = doctors.filter(doc => doc.specialization === specialtyQuery);
     }
 
@@ -129,7 +129,7 @@ export default function DoctorSearchSection() {
                 <SelectValue placeholder="Filter by Specialty" />
               </SelectTrigger>
               <SelectContent>
-                 <SelectItem value="">All Specialties</SelectItem>
+                 <SelectItem value="All Specialties">All Specialties</SelectItem>
                  {specialties.map((type) => (
                   <SelectItem key={type.name} value={type.name}>
                     <div className="flex items-center gap-2">

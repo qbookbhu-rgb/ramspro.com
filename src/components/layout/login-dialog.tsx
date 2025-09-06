@@ -141,7 +141,7 @@ export function LoginDialog({ isOpen, onOpenChange }: LoginDialogProps) {
                     placeholder="98765 43210"
                 />
               </div>
-              <Button onClick={handleSendOtp} disabled={isLoading}>
+              <Button onClick={handleSendOtp} disabled={isLoading || mobile.length !== 10}>
                 {isLoading ? <Loader2 className="animate-spin" /> : 'Send OTP'}
               </Button>
             </div>
