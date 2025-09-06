@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Languages, Menu, UserCircle, X, LogOut, Briefcase, Ambulance, Beaker, Pill } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { usePathname, useRouter } from 'next-intl/client';
+import { usePathname, useRouter } from 'next-intl/navigation';
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
