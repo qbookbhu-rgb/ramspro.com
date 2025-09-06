@@ -4,13 +4,14 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Upload, FileText, Loader2 } from 'lucide-react';
+import { Upload, FileText, Loader2, FileSearch } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PrescriptionIcon } from '../icons/prescription';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, orderBy, doc, getDoc } from 'firebase/firestore';
 import { format } from 'date-fns';
+import Link from 'next/link';
 
 interface Prescription {
     id: string;
@@ -32,7 +33,12 @@ const RecordItem = ({ record }: { record: Prescription }) => {
                     </p>
                 </div>
             </div>
-            <Button variant="outline" size="sm">View Details</Button>
+            <Button variant="outline" size="sm" asChild>
+                <Link href={`/patient/prescription/${record.id}`}>
+                    <FileSearch className="mr-2 h-4 w-4" />
+                    View Details
+                </Link>
+            </Button>
         </div>
     );
 };
