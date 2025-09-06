@@ -4,7 +4,7 @@
 import { aiSymptomChecker, type AISymptomCheckerInput } from "@/ai/flows/ai-symptom-checker";
 import { aiPrescriptionAssistant, type AIPrescriptionAssistantInput } from "@/ai/flows/ai-prescription-assistant";
 import { auth, db } from "@/lib/firebase-admin";
-import { collection, setDoc, doc, addDoc, getDoc, updateDoc } from "firebase/firestore";
+import { collection, setDoc, doc, addDoc, getDoc, updateDoc } from "firebase-admin/firestore";
 
 export async function getDoctorRecommendation(input: AISymptomCheckerInput) {
   try {
