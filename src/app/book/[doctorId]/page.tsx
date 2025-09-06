@@ -28,6 +28,7 @@ interface Doctor {
     rating: number;
     reviews: number;
     dataAiHint: string;
+    isClinic: boolean;
 }
 
 export default function BookAppointmentPage({ params }: { params: { doctorId: string } }) {
@@ -58,10 +59,11 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
                         city: data.city || 'Unknown Location',
                         experience: data.experience,
                         consultationFee: data.consultationFee,
-                        image: `https://picsum.photos/600/400?random=${Math.random()}`,
+                        image: `https://picsum.photos/600/400?random=${params.doctorId}`, // Use ID for consistent image
                         rating: 4.8, 
                         reviews: 132,
                         dataAiHint: 'doctor portrait',
+                        isClinic: data.profileType === 'clinic_owner',
                     });
                      // We assume online availability for now
                     setSelectedConsultation('video');
@@ -181,7 +183,7 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
                             
                              <div className="mt-4 flex items-center gap-1 text-md">
                                 <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-                                <span className="font-bold text-foreground">{doctor.rating}</span>
+                                <span className="font-bold text-foreground">{doctor.rating.toFixed(1)}</span>
                                 <span className="text-muted-foreground">({doctor.reviews} reviews)</span>
                             </div>
 
@@ -190,11 +192,17 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
                                 <span>{doctor.city}</span>
                             </div>
 
-                             <div className="mt-4 flex gap-2">
+                             <div className="mt-4 flex flex-wrap gap-2">
                                 <Badge variant={'secondary'} className="flex items-center gap-1.5 whitespace-nowrap">
                                     <Video className="h-3 w-3" />
                                     Online
                                 </Badge>
+                                {doctor.isClinic && (
+                                     <Badge variant={'secondary'} className="flex items-center gap-1.5 whitespace-nowrap">
+                                        <Hospital className="h-3 w-3" />
+                                        In-Clinic
+                                    </Badge>
+                                )}
                              </div>
                         </CardContent>
                     </Card>
@@ -206,7 +214,7 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
                         <CardHeader>
                             <CardTitle className="font-headline text-3xl">Book Appointment</CardTitle>
                             <CardDescription>Select a date and time that works for you.</CardDescription>
-                        </CardHeader>
+                        </Header>
                         <CardContent className="space-y-8">
                             <div>
                                 <h3 className="font-bold mb-4 flex items-center"><CalendarIcon className="mr-2"/>Select Date</h3>
@@ -245,8 +253,8 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
                                 >
                                     {consultationTypes.map(type => (
                                         <div key={type.name} className="flex items-center space-x-2">
-                                             <RadioGroupItem value={type.name.toLowerCase()} id={type.name.toLowerCase()} disabled={type.name === 'In-Clinic'} />
-                                             <Label htmlFor={type.name.toLowerCase()} className="flex items-center gap-2 cursor-pointer">
+                                             <RadioGroupItem value={type.name.toLowerCase()} id={type.name.toLowerCase()} disabled={type.name === 'In-Clinic' && !doctor.isClinic} />
+                                             <Label htmlFor={type.name.toLowerCase()} className={cn("flex items-center gap-2", (type.name === 'In-Clinic' && !doctor.isClinic) ? "cursor-not-allowed opacity-50" : "cursor-pointer")}>
                                                 <type.icon className="h-4 w-4 text-muted-foreground" />
                                                 {type.name}
                                              </Label>

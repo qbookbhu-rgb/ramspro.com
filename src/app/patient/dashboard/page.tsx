@@ -10,7 +10,7 @@ import { HealthCard } from "@/components/patient/health-card";
 import DoctorSearchSection from "@/components/home/doctor-search-section";
 import WellnessSection from "@/components/home/wellness-section";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, FileText, LayoutDashboard, Loader2 } from "lucide-react";
 import UpcomingAppointments from "@/components/patient/upcoming-appointments";
 import MedicalRecords from "@/components/patient/medical-records";
@@ -107,17 +107,17 @@ export default function PatientDashboardPage() {
 
         <TabsContent value="dashboard">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-1">
+              <div className="lg:col-span-1 space-y-8">
                 <HealthCard patient={patientData} />
-              </div>
-              <div className="lg:col-span-2 space-y-8">
-                <UpcomingAppointments />
                  <Card>
                   <CardContent className="p-6">
                     <h3 className="font-bold">Recent Lab Reports</h3>
                     <p className="text-muted-foreground text-sm mt-2">No recent reports available.</p>
                   </CardContent>
                 </Card>
+              </div>
+              <div className="lg:col-span-2 space-y-8">
+                <UpcomingAppointments />
               </div>
             </div>
             <div className="mt-8">
@@ -138,4 +138,3 @@ export default function PatientDashboardPage() {
   );
 }
 
-    

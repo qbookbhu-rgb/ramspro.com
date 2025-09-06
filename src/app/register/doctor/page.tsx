@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from 'next/navigation';
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -49,7 +49,24 @@ const formSchema = z.object({
   clinicName: z.string().optional(),
   clinicAddress: z.string().optional(),
   city: z.string().min(2, "City is required."),
+}).refine(data => {
+    if (data.profileType === 'clinic_owner') {
+        return !!data.clinicName && data.clinicName.length > 0;
+    }
+    return true;
+}, {
+    message: "Clinic name is required.",
+    path: ["clinicName"],
+}).refine(data => {
+    if (data.profileType === 'clinic_owner') {
+        return !!data.clinicAddress && data.clinicAddress.length > 0;
+    }
+    return true;
+}, {
+    message: "Clinic address is required.",
+    path: ["clinicAddress"],
 });
+
 
 type FormData = z.infer<typeof formSchema>;
 
@@ -229,10 +246,10 @@ export default function DoctorRegistrationPage() {
                         <FormItem><FormLabel>Medical Registration No.</FormLabel><FormControl><Input placeholder="e.g., MCI12345" {...field} /></FormControl><FormMessage /></FormItem>
                     )}/>
                     <FormField name="experience" control={form.control} render={({ field }) => (
-                        <FormItem><FormLabel>Years of Experience</FormLabel><FormControl><Input type="number" placeholder="e.g., 10" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Years of Experience</FormLabel><FormControl><Input type="number" placeholder="e.g., 10" {...field} /></FormControl><FormMessage /></FormItem>
                     )}/>
                     <FormField name="consultationFee" control={form.control} render={({ field }) => (
-                        <FormItem><FormLabel>Consultation Fee (INR)</FormLabel><FormControl><Input type="number" placeholder="e.g., 500" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)}/></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Consultation Fee (INR)</FormLabel><FormControl><Input type="number" placeholder="e.g., 500" {...field} /></FormControl><FormMessage /></FormItem>
                     )}/>
                  </div>
               </section>
