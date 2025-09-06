@@ -5,7 +5,7 @@ import { aiSymptomChecker, type AISymptomCheckerInput } from "@/ai/flows/ai-symp
 import { aiPrescriptionAssistant, type AIPrescriptionAssistantInput } from "@/ai/flows/ai-prescription-assistant";
 import { findAmbulance } from "@/ai/flows/ai-find-ambulance";
 import { auth, db } from "@/lib/firebase-admin";
-import { collection, setDoc, doc, addDoc, getDoc, updateDoc, serverTimestamp } from "firebase-admin/firestore";
+import { collection, setDoc, doc, addDoc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 
 export async function getDoctorRecommendation(input: AISymptomCheckerInput) {
   try {
@@ -318,3 +318,5 @@ export async function createOrder(pharmacyId: string, prescriptionId: string, pa
         return { success: false, error: 'Could not place the order. Please try again.' };
     }
 }
+
+    
