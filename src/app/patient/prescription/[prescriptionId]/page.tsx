@@ -13,6 +13,8 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { PrescriptionIcon } from '@/components/icons/prescription';
+import { useToast } from '@/hooks/use-toast';
+
 
 interface Medication {
   name: string;
@@ -37,6 +39,7 @@ interface PrescriptionData {
 export default function PrescriptionDetailPage({ params }: { params: { prescriptionId: string } }) {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  const { toast } = useToast();
   const [prescription, setPrescription] = useState<PrescriptionData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -57,6 +60,8 @@ export default function PrescriptionDetailPage({ params }: { params: { prescript
         // Security check: ensure the logged-in user is the patient for this prescription
         if (data.patientId !== user.uid) {
             console.error("Access denied. User is not the owner of this prescription.");
+            // Redirect or show a proper "access denied" page instead of notFound
+            // for better user experience, but for now this is fine.
             notFound();
             return;
         }
@@ -100,7 +105,7 @@ export default function PrescriptionDetailPage({ params }: { params: { prescript
     if (!authLoading) {
         fetchPrescription();
     }
-  }, [params.prescriptionId, user, authLoading, router]);
+  }, [params.prescriptionId, user, authLoading, toast]);
 
   if (isLoading || authLoading) {
     return <div className="container py-10 flex justify-center"><Loader2 className="h-16 w-16 animate-spin text-primary" /></div>;
