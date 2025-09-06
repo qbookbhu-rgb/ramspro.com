@@ -97,7 +97,7 @@ export default function PatientDashboardPage() {
           </TabsTrigger>
           <TabsTrigger value="appointments" className="py-2">
             <Calendar className="mr-2" />
-            Appointments & Doctors
+            Appointments
             </TabsTrigger>
           <TabsTrigger value="records" className="py-2">
             <FileText className="mr-2" />
@@ -107,6 +107,9 @@ export default function PatientDashboardPage() {
 
         <TabsContent value="dashboard">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-8">
+                <UpcomingAppointments />
+              </div>
               <div className="lg:col-span-1 space-y-8">
                 <HealthCard patient={patientData} />
                  <Card>
@@ -116,18 +119,17 @@ export default function PatientDashboardPage() {
                   </CardContent>
                 </Card>
               </div>
-              <div className="lg:col-span-2 space-y-8">
-                <UpcomingAppointments />
-              </div>
             </div>
-            <div className="mt-8">
+            <div className="mt-12">
               <WellnessSection />
             </div>
         </TabsContent>
         <TabsContent value="appointments">
            <div className="space-y-8">
              <UpcomingAppointments />
-             <DoctorSearchSection />
+             <div className="mt-12">
+                <DoctorSearchSection />
+             </div>
            </div>
         </TabsContent>
         <TabsContent value="records">
@@ -137,4 +139,3 @@ export default function PatientDashboardPage() {
     </div>
   );
 }
-

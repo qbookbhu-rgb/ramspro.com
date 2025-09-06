@@ -41,7 +41,7 @@ export default function UpcomingAppointments() {
         const q = query(
             collection(db, "appointments"), 
             where("doctorId", "==", doctorId),
-            orderBy("createdAt", "desc")
+            orderBy("appointmentDate", "desc")
         );
 
         const unsubscribe = onSnapshot(q, async (querySnapshot) => {
@@ -78,14 +78,14 @@ export default function UpcomingAppointments() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Upcoming Patient Appointments</CardTitle>
+                <CardTitle>Patient Appointments</CardTitle>
                 <CardDescription>Here are your scheduled appointments with patients.</CardDescription>
             </CardHeader>
             <CardContent>
                 {isLoading || authLoading ? (
                     <div className="space-y-4">
-                        <Skeleton className="h-28 w-full" />
-                        <Skeleton className="h-28 w-full" />
+                        <Skeleton className="h-32 w-full" />
+                        <Skeleton className="h-32 w-full" />
                     </div>
                 ) : appointments.length > 0 ? (
                     <div className="space-y-4">

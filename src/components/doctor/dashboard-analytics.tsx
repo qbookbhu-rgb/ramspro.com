@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -15,6 +15,7 @@ interface Appointment {
   id: string;
   appointmentDate: { seconds: number; nanoseconds: number; };
   consultationFee?: number;
+  patientId: string;
 }
 
 interface ChartData {
@@ -37,6 +38,18 @@ export default function DashboardAnalytics() {
 
     const fetchAppointments = async () => {
       setIsLoading(true);
+      
+      let doctorFee = 0;
+      try {
+        const doctorDocRef = doc(db, "doctors", user.uid);
+        const doctorDoc = await getDoc(doctorDocRef);
+        if (doctorDoc.exists()) {
+          doctorFee = doctorDoc.data().consultationFee || 0;
+        }
+      } catch (error) {
+        console.error("Error fetching doctor's fee:", error);
+      }
+
       const q = query(
         collection(db, "appointments"),
         where("doctorId", "==", user.uid)
@@ -46,24 +59,12 @@ export default function DashboardAnalytics() {
       const fetchedAppointments: Appointment[] = [];
       const patientIds = new Set<string>();
       let earnings = 0;
-      let doctorFee = 0;
-
-      // First fetch the doctor's consultation fee
-      try {
-        const doctorDoc = await getDocs(query(collection(db, "doctors"), where("uid", "==", user.uid)));
-        if (!doctorDoc.empty) {
-          doctorFee = doctorDoc.docs[0].data().consultationFee || 0;
-        }
-      } catch (error) {
-        console.error("Error fetching doctor's fee:", error);
-      }
-
 
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         fetchedAppointments.push({ id: doc.id, ...data } as Appointment);
         patientIds.add(data.patientId);
-        earnings += doctorFee; // Assume fee is the same for all
+        earnings += doctorFee;
       });
       
       setAppointments(fetchedAppointments);
@@ -99,10 +100,10 @@ export default function DashboardAnalytics() {
 
   const chartData = generateChartData();
 
-  if (isLoading) {
+  if (isLoading || authLoading) {
     return (
         <div className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <Skeleton className="h-28 w-full" />
                 <Skeleton className="h-28 w-full" />
                 <Skeleton className="h-28 w-full" />
@@ -159,7 +160,7 @@ export default function DashboardAnalytics() {
               <YAxis allowDecimals={false} />
               <Tooltip />
               <Legend />
-              <Bar dataKey="appointments" fill="var(--color-primary)" name="Appointments" />
+              <Bar dataKey="appointments" fill="hsl(var(--primary))" name="Appointments" />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
