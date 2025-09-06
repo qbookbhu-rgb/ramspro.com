@@ -1,33 +1,90 @@
+
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Upload, FileText } from 'lucide-react';
+import { Upload, FileText, Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PrescriptionIcon } from '../icons/prescription';
+import { useAuth } from '@/hooks/use-auth';
+import { db } from '@/lib/firebase';
+import { collection, query, where, onSnapshot, orderBy, doc, getDoc } from 'firebase/firestore';
+import { format } from 'date-fns';
 
-// Mock data for records - in a real app, this would be fetched
-const mockRecords = [
-    { id: 'rec1', type: 'Prescription', name: 'Prescription from Dr. Sharma', date: '2023-10-15' },
-    { id: 'rec2', type: 'Lab Report', name: 'Blood Test Report', date: '2023-10-12' },
-    { id: 'rec3', type: 'Prescription', name: 'Follow-up Prescription', date: '2023-09-20' },
-];
+interface Prescription {
+    id: string;
+    diagnosis: string;
+    doctorId: string;
+    doctorName?: string; // To be fetched
+    createdAt: string; // Stored as ISO string
+}
 
+const RecordItem = ({ record }: { record: Prescription }) => {
+    return (
+        <div className="border p-4 rounded-lg flex items-center justify-between hover:bg-muted/50">
+            <div className="flex items-center gap-4">
+                <PrescriptionIcon className="h-6 w-6 text-primary flex-shrink-0" />
+                <div>
+                    <p className="font-semibold">{record.diagnosis}</p>
+                    <p className="text-sm text-muted-foreground">
+                        Prescribed by {record.doctorName || 'Dr. ...'} on {format(new Date(record.createdAt), 'PPP')}
+                    </p>
+                </div>
+            </div>
+            <Button variant="outline" size="sm">View Details</Button>
+        </div>
+    );
+};
 
 export default function MedicalRecords() {
-    const [records, setRecords] = useState(mockRecords);
+    const { user, loading: authLoading } = useAuth();
+    const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const getIconForType = (type: string) => {
-        switch(type) {
-            case 'Prescription':
-                return <PrescriptionIcon className="h-6 w-6 text-primary" />;
-            case 'Lab Report':
-                return <FileText className="h-6 w-6 text-primary" />;
-            default:
-                return <FileText className="h-6 w-6 text-primary" />;
+    useEffect(() => {
+        if (authLoading) return;
+        if (!user) {
+            setIsLoading(false);
+            return;
         }
-    }
+
+        const q = query(
+            collection(db, "prescriptions"),
+            where("patientId", "==", user.uid),
+            orderBy("createdAt", "desc")
+        );
+
+        const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+            const prescriptionsData: Prescription[] = [];
+            for (const docSnapshot of querySnapshot.docs) {
+                const data = docSnapshot.data();
+                const prescription: Prescription = {
+                    id: docSnapshot.id,
+                    diagnosis: data.diagnosis,
+                    doctorId: data.doctorId,
+                    createdAt: data.createdAt,
+                };
+
+                // Fetch doctor's name
+                const doctorDocRef = doc(db, 'doctors', data.doctorId);
+                const doctorDoc = await getDoc(doctorDocRef);
+                if (doctorDoc.exists()) {
+                    prescription.doctorName = doctorDoc.data().name;
+                }
+
+                prescriptionsData.push(prescription);
+            }
+            setPrescriptions(prescriptionsData);
+            setIsLoading(false);
+        }, (error) => {
+            console.error("Error fetching prescriptions:", error);
+            setIsLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, [user, authLoading]);
+
 
     return (
         <Card>
@@ -42,37 +99,32 @@ export default function MedicalRecords() {
                 </Button>
             </CardHeader>
             <CardContent>
-                 <Tabs defaultValue="all">
+                 <Tabs defaultValue="prescriptions">
                     <TabsList>
-                        <TabsTrigger value="all">All</TabsTrigger>
                         <TabsTrigger value="prescriptions">Prescriptions</TabsTrigger>
-                        <TabsTrigger value="reports">Lab Reports</TabsTrigger>
+                        <TabsTrigger value="reports" disabled>Lab Reports</TabsTrigger>
+                        <TabsTrigger value="all" disabled>All Documents</TabsTrigger>
                     </TabsList>
                     
-                    <div className="mt-6">
-                        {records.length > 0 ? (
+                    <TabsContent value="prescriptions" className="mt-6">
+                        {isLoading ? (
+                            <div className="flex justify-center py-12">
+                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                            </div>
+                        ) : prescriptions.length > 0 ? (
                              <div className="space-y-4">
-                                {records.map(record => (
-                                    <div key={record.id} className="border p-4 rounded-lg flex items-center justify-between hover:bg-muted/50">
-                                        <div className="flex items-center gap-4">
-                                            {getIconForType(record.type)}
-                                            <div>
-                                                <p className="font-semibold">{record.name}</p>
-                                                <p className="text-sm text-muted-foreground">Dated: {record.date}</p>
-                                            </div>
-                                        </div>
-                                        <Button variant="outline" size="sm">View</Button>
-                                    </div>
+                                {prescriptions.map(record => (
+                                    <RecordItem key={record.id} record={record} />
                                 ))}
                             </div>
                         ) : (
                             <div className="text-center py-12 text-muted-foreground">
-                                <FileText className="h-12 w-12 mx-auto mb-4" />
-                                <h3 className="text-lg font-semibold">No Records Found</h3>
-                                <p>Start by uploading your first medical document.</p>
+                                <PrescriptionIcon className="h-12 w-12 mx-auto mb-4" />
+                                <h3 className="text-lg font-semibold">No Prescriptions Found</h3>
+                                <p>Your prescriptions from doctors will appear here.</p>
                             </div>
                         )}
-                    </div>
+                    </TabsContent>
                 </Tabs>
             </CardContent>
         </Card>
