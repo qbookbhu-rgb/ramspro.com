@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Search, MapPin, Star, Video, Hospital, Loader2 } from "lucide-react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { consultationTypes } from "@/lib/data";
+import { consultationTypes, specialties } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,7 +21,6 @@ interface Doctor {
     city: string;
     experience: number;
     consultationFee: number;
-    // For now, we'll use placeholders for image, rating, and reviews
     image: string;
     rating: number;
     reviews: number;
@@ -29,8 +28,14 @@ interface Doctor {
 }
 
 export default function DoctorSearchSection() {
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [allDoctors, setAllDoctors] = useState<Doctor[]>([]);
+  const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Search and filter states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [locationQuery, setLocationQuery] = useState("");
+  const [specialtyQuery, setSpecialtyQuery] = useState("");
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -38,23 +43,23 @@ export default function DoctorSearchSection() {
         try {
             const doctorsCollection = collection(db, 'doctors');
             const doctorSnapshot = await getDocs(doctorsCollection);
-            const doctorsList = doctorSnapshot.docs.map((doc, index) => {
+            const doctorsList: Doctor[] = doctorSnapshot.docs.map((doc, index) => {
                 const data = doc.data();
                 return {
                     uid: doc.id,
                     name: data.name,
                     specialization: data.specialization,
-                    city: data.city || 'Unknown Location', // Fallback for city
+                    city: data.city || 'Unknown Location',
                     experience: data.experience,
                     consultationFee: data.consultationFee,
-                    // Placeholder data for fields not in registration
                     image: `https://picsum.photos/200/200?random=${index + 1}`,
-                    rating: 4.5 + (Math.random() * 0.5), // Random rating between 4.5 and 5.0
-                    reviews: Math.floor(Math.random() * 200) + 50, // Random reviews between 50 and 250
+                    rating: 4.5 + (Math.random() * 0.5),
+                    reviews: Math.floor(Math.random() * 200) + 50,
                     dataAiHint: 'doctor portrait'
                 };
             });
-            setDoctors(doctorsList);
+            setAllDoctors(doctorsList);
+            setFilteredDoctors(doctorsList);
         } catch (error) {
             console.error("Error fetching doctors: ", error);
         } finally {
@@ -63,6 +68,31 @@ export default function DoctorSearchSection() {
     };
     fetchDoctors();
   }, []);
+
+  useEffect(() => {
+    let doctors = [...allDoctors];
+
+    if (searchQuery) {
+        doctors = doctors.filter(doc => 
+            doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            doc.specialization.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }
+
+    if (locationQuery) {
+        doctors = doctors.filter(doc =>
+            doc.city.toLowerCase().includes(locationQuery.toLowerCase())
+        );
+    }
+    
+    if (specialtyQuery) {
+        doctors = doctors.filter(doc => doc.specialization === specialtyQuery);
+    }
+
+    setFilteredDoctors(doctors);
+
+  }, [searchQuery, locationQuery, specialtyQuery, allDoctors]);
+
 
   return (
     <section id="find-a-doctor" className="container">
@@ -76,21 +106,32 @@ export default function DoctorSearchSection() {
       <Card className="mb-12 shadow-md">
         <CardContent className="p-4 sm:p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-            <div className="relative">
+            <div className="relative lg:col-span-2">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input placeholder="Symptom or Specialty" className="pl-10" />
+              <Input 
+                placeholder="Doctor name or specialty..." 
+                className="pl-10" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
             <div className="relative">
               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input placeholder="Location" className="pl-10" />
+              <Input 
+                placeholder="Location" 
+                className="pl-10" 
+                value={locationQuery}
+                onChange={(e) => setLocationQuery(e.target.value)}
+              />
             </div>
-            <Select>
+            <Select onValueChange={setSpecialtyQuery} value={specialtyQuery}>
               <SelectTrigger>
-                <SelectValue placeholder="Consultation Type" />
+                <SelectValue placeholder="Filter by Specialty" />
               </SelectTrigger>
               <SelectContent>
-                {consultationTypes.map((type) => (
-                  <SelectItem key={type.name} value={type.name.toLowerCase()}>
+                 <SelectItem value="">All Specialties</SelectItem>
+                 {specialties.map((type) => (
+                  <SelectItem key={type.name} value={type.name}>
                     <div className="flex items-center gap-2">
                         <type.icon className="h-4 w-4 text-muted-foreground"/>
                         <span>{type.name}</span>
@@ -99,10 +140,6 @@ export default function DoctorSearchSection() {
                 ))}
               </SelectContent>
             </Select>
-            <Button className="w-full bg-accent hover:bg-accent/90">
-              <Search className="mr-2 h-4 w-4" />
-              Search
-            </Button>
           </div>
         </CardContent>
       </Card>
@@ -111,9 +148,9 @@ export default function DoctorSearchSection() {
              <div className="container py-10 flex justify-center items-center h-[30vh]">
                 <Loader2 className="h-16 w-16 animate-spin text-primary" />
             </div>
-        ) : doctors.length > 0 ? (
+        ) : filteredDoctors.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {doctors.map((doctor) => (
+            {filteredDoctors.map((doctor) => (
             <Card key={doctor.uid} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <CardHeader className="p-0">
                     <div className="relative h-48 w-full">
@@ -161,7 +198,7 @@ export default function DoctorSearchSection() {
         </div>
       ) : (
         <div className="text-center py-10">
-            <p className="text-muted-foreground">No doctors found. Register a doctor to see them here.</p>
+            <p className="text-muted-foreground">No doctors found matching your criteria. Try broadening your search.</p>
         </div>
       )}
     </section>
