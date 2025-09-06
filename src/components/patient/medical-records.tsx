@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Upload, FileText, Loader2, FileSearch } from 'lucide-react';
+import { Upload, FileText, Loader2, FileSearch, FlaskConical } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PrescriptionIcon } from '../icons/prescription';
 import { useAuth } from '@/hooks/use-auth';
@@ -21,7 +21,14 @@ interface Prescription {
     createdAt: string; // Stored as ISO string
 }
 
-const RecordItem = ({ record }: { record: Prescription }) => {
+interface LabReport {
+    id: string;
+    name: string;
+    date: string;
+    labName: string;
+}
+
+const PrescriptionRecordItem = ({ record }: { record: Prescription }) => {
     return (
         <div className="border p-4 rounded-lg flex items-center justify-between hover:bg-muted/50">
             <div className="flex items-center gap-4">
@@ -43,9 +50,34 @@ const RecordItem = ({ record }: { record: Prescription }) => {
     );
 };
 
+const LabReportItem = ({ report }: { report: LabReport }) => {
+    return (
+        <div className="border p-4 rounded-lg flex items-center justify-between hover:bg-muted/50">
+            <div className="flex items-center gap-4">
+                <FlaskConical className="h-6 w-6 text-primary flex-shrink-0" />
+                <div>
+                    <p className="font-semibold">{report.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                        From {report.labName} on {format(new Date(report.date), 'PPP')}
+                    </p>
+                </div>
+            </div>
+            <Button variant="outline" size="sm">
+                <FileSearch className="mr-2 h-4 w-4" />
+                View Report
+            </Button>
+        </div>
+    );
+}
+
 export default function MedicalRecords() {
     const { user, loading: authLoading } = useAuth();
     const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+    const [labReports, setLabReports] = useState<LabReport[]>([
+        // Mock data for now
+        { id: '1', name: 'Complete Blood Count', date: '2023-10-15T10:00:00Z', labName: 'City Diagnostics' },
+        { id: '2', name: 'Lipid Profile', date: '2023-10-15T10:00:00Z', labName: 'City Diagnostics' },
+    ]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -106,10 +138,9 @@ export default function MedicalRecords() {
             </CardHeader>
             <CardContent>
                  <Tabs defaultValue="prescriptions">
-                    <TabsList>
-                        <TabsTrigger value="prescriptions">Prescriptions</TabsTrigger>
-                        <TabsTrigger value="reports" disabled>Lab Reports</TabsTrigger>
-                        <TabsTrigger value="all" disabled>All Documents</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="prescriptions"><PrescriptionIcon className="mr-2 h-4 w-4"/>Prescriptions</TabsTrigger>
+                        <TabsTrigger value="reports"><FlaskConical className="mr-2 h-4 w-4"/>Lab Reports</TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="prescriptions" className="mt-6">
@@ -120,7 +151,7 @@ export default function MedicalRecords() {
                         ) : prescriptions.length > 0 ? (
                              <div className="space-y-4">
                                 {prescriptions.map(record => (
-                                    <RecordItem key={record.id} record={record} />
+                                    <PrescriptionRecordItem key={record.id} record={record} />
                                 ))}
                             </div>
                         ) : (
@@ -128,6 +159,25 @@ export default function MedicalRecords() {
                                 <PrescriptionIcon className="h-12 w-12 mx-auto mb-4" />
                                 <h3 className="text-lg font-semibold">No Prescriptions Found</h3>
                                 <p>Your prescriptions from doctors will appear here.</p>
+                            </div>
+                        )}
+                    </TabsContent>
+                    <TabsContent value="reports" className="mt-6">
+                         {isLoading ? (
+                            <div className="flex justify-center py-12">
+                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                            </div>
+                        ) : labReports.length > 0 ? (
+                             <div className="space-y-4">
+                                {labReports.map(report => (
+                                    <LabReportItem key={report.id} report={report} />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-12 text-muted-foreground">
+                                <FlaskConical className="h-12 w-12 mx-auto mb-4" />
+                                <h3 className="text-lg font-semibold">No Lab Reports Found</h3>
+                                <p>Your uploaded lab reports will appear here.</p>
                             </div>
                         )}
                     </TabsContent>
