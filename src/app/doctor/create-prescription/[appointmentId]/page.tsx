@@ -15,6 +15,7 @@ import { Loader2, ArrowLeft, Plus, Trash2, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import { createPrescription } from '@/app/actions';
 
 // Define the schema for a single medication
 const medicationSchema = z.object({
@@ -32,12 +33,18 @@ const formSchema = z.object({
 });
 
 type FormData = z.infer<typeof formSchema>;
+interface AppointmentData {
+  id: string;
+  patientId: string;
+  doctorId: string;
+  patientName?: string;
+}
 
 export default function CreatePrescriptionPage({ params }: { params: { appointmentId: string } }) {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [appointment, setAppointment] = useState(null);
+  const [appointment, setAppointment] = useState<AppointmentData | null>(null);
   const [isAppointmentLoading, setIsAppointmentLoading] = useState(true);
 
   const form = useForm<FormData>({
@@ -65,7 +72,7 @@ export default function CreatePrescriptionPage({ params }: { params: { appointme
           return;
         }
         
-        const appointmentData = apptDoc.data();
+        const appointmentData = {id: apptDoc.id, ...apptDoc.data()};
 
         // Fetch patient details
         const patientDocRef = doc(db, 'patients', appointmentData.patientId);
@@ -94,47 +101,33 @@ export default function CreatePrescriptionPage({ params }: { params: { appointme
   }, [params.appointmentId, toast]);
 
   async function onSubmit(values: FormData) {
-    setIsLoading(true);
-    // Here you would typically save the prescription to Firestore
-    // For now, we'll just log it and show a success message
-    console.log('Prescription Data:', values);
-
-    // Example of saving to Firestore (uncomment and adapt when ready)
-    /*
-    try {
-      await addDoc(collection(db, 'prescriptions'), {
-        ...values,
-        appointmentId: params.appointmentId,
-        patientId: appointment.patientId,
-        doctorId: appointment.doctorId,
-        createdAt: serverTimestamp(),
-      });
-      toast({
-        title: 'Prescription Created',
-        description: 'The e-prescription has been saved and is available to the patient.',
-      });
-      router.push('/doctor/dashboard');
-    } catch (error) {
-      console.error('Error saving prescription:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Save Failed',
-        description: 'Could not save the prescription. Please try again.',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-    */
-
-    // Demo-only logic:
-    setTimeout(() => {
-        setIsLoading(false);
+    if (!appointment) {
         toast({
-            title: "Prescription Created (Demo)",
-            description: "The e-prescription has been created successfully.",
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Appointment details not loaded.',
+        });
+        return;
+    }
+    setIsLoading(true);
+
+    const result = await createPrescription(values, appointment);
+
+    setIsLoading(false);
+
+    if (result.success) {
+        toast({
+            title: 'Prescription Created',
+            description: 'The e-prescription has been saved and is available to the patient.',
         });
         router.push('/doctor/dashboard');
-    }, 1000);
+    } else {
+        toast({
+            variant: 'destructive',
+            title: 'Save Failed',
+            description: result.error || 'Could not save the prescription. Please try again.',
+        });
+    }
   }
 
   if (isAppointmentLoading) {

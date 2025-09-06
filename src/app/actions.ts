@@ -1,8 +1,9 @@
+
 "use server";
 
 import { aiSymptomChecker, type AISymptomCheckerInput } from "@/ai/flows/ai-symptom-checker";
 import { auth, db } from "@/lib/firebase-admin";
-import { collection, setDoc, doc } from "firebase/firestore";
+import { collection, setDoc, doc, addDoc, serverTimestamp } from "firebase/firestore";
 
 export async function getDoctorRecommendation(input: AISymptomCheckerInput) {
   try {
@@ -102,4 +103,22 @@ export async function registerDoctor(formData: any) {
     }
     return { success: false, error: errorMessage };
   }
+}
+
+export async function createPrescription(values: any, appointment: any) {
+    try {
+        await addDoc(collection(db, 'prescriptions'), {
+            ...values,
+            appointmentId: appointment.id,
+            patientId: appointment.patientId,
+            doctorId: appointment.doctorId,
+            createdAt: new Date().toISOString(),
+        });
+
+        return { success: true, message: 'Prescription created successfully.' };
+
+    } catch (error) {
+        console.error('Error saving prescription:', error);
+        return { success: false, error: 'Could not save the prescription. Please try again.' };
+    }
 }
