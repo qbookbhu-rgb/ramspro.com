@@ -118,6 +118,9 @@ export async function createPrescription(values: any, appointment: any) {
 }
 
 export async function getUserRole(uid: string): Promise<{ role: 'patient' | 'doctor' | 'unknown'; data: any | null }> {
+  if (!uid) {
+    return { role: 'unknown', data: null };
+  }
   try {
     const patientDocRef = doc(db, 'patients', uid);
     const patientDoc = await getDoc(patientDocRef);

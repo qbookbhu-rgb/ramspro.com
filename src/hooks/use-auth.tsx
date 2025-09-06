@@ -6,6 +6,7 @@ import {
     useEffect,
     createContext,
     useContext,
+    useCallback,
     type ReactNode,
 } from "react";
 import { onAuthStateChanged, signOut as firebaseSignOut, type User } from "firebase/auth";
@@ -20,6 +21,7 @@ interface AuthContextType {
     signOut: () => Promise<void>;
     userRole: UserRole | null;
     userData: any | null; // To store Firestore data
+    refreshUserRole: () => Promise<{ role: UserRole, data: any }>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -28,6 +30,7 @@ const AuthContext = createContext<AuthContextType>({
     signOut: async () => {},
     userRole: null,
     userData: null,
+    refreshUserRole: async () => ({ role: 'unknown', data: null }),
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -36,13 +39,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [userRole, setUserRole] = useState<UserRole | null>(null);
     const [userData, setUserData] = useState<any | null>(null);
 
+    const refreshUserRole = useCallback(async () => {
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+            const { role, data } = await getUserRole(currentUser.uid);
+            setUserRole(role);
+            setUserData(data);
+            return { role, data };
+        }
+        setUserRole(null);
+        setUserData(null);
+        return { role: 'unknown' as UserRole, data: null };
+    }, []);
+
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setUser(user);
             if (user) {
-                const { role, data } = await getUserRole(user.uid);
-                setUserRole(role);
-                setUserData(data);
+                await refreshUserRole();
             } else {
                 setUserRole(null);
                 setUserData(null);
@@ -51,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [refreshUserRole]);
 
     const signOut = async () => {
         try {
@@ -68,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signOut,
         userRole,
         userData,
+        refreshUserRole,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

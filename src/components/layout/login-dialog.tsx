@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2,LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { getUserRole } from "@/app/actions";
 
 interface LoginDialogProps {
     isOpen: boolean;
@@ -31,7 +32,7 @@ interface LoginDialogProps {
 export function LoginDialog({ isOpen, onOpenChange }: LoginDialogProps) {
   const { toast } = useToast();
   const router = useRouter();
-  const { userRole } = useAuth(); // We can get the role from the auth context now
+  const { refreshUserRole } = useAuth(); // We can get the role from the auth context now
   const [step, setStep] = useState<'mobile' | 'otp'>('mobile');
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
@@ -82,20 +83,24 @@ export function LoginDialog({ isOpen, onOpenChange }: LoginDialogProps) {
     confirmationResult.confirm(otp).then(async (result: any) => {
         toast({
             title: "Login Successful!",
-            description: "Welcome back!",
+            description: "Welcome back! Redirecting...",
         });
-        onOpenChange(false); // Close the dialog
 
-        // The redirect logic is now handled by the useAuth hook's effect
-        // but we can still push to a default dashboard as a fallback.
-        if (userRole === 'patient') {
+        // The useAuth hook will now handle redirection automatically
+        // after we trigger a role refresh.
+        const { role } = await refreshUserRole();
+        onOpenChange(false); // Close the dialog
+        
+        if (role === 'patient') {
             router.push('/patient/dashboard');
-        } else if (userRole === 'doctor') {
+        } else if (role === 'doctor') {
             router.push('/doctor/dashboard');
         } else {
             // Default redirect if role is unknown or user is new
-            router.push('/'); 
+            // This might happen if they log in but haven't completed registration
+            router.push('/register');
         }
+
 
     }).catch((error: any) => {
         console.error("OTP verification failed", error);
