@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from 'next/navigation';
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -79,9 +79,12 @@ export default function LabRegistrationPage() {
     }
   }
 
+  useEffect(() => {
+    generateRecaptcha();
+  }, []);
+
   const handleSendOtp = (phoneNumber: string) => {
     setIsLoading(true);
-    generateRecaptcha();
     let appVerifier = window.recaptchaVerifier;
     signInWithPhoneNumber(auth, `+91${phoneNumber}`, appVerifier)
       .then(confirmationResult => {

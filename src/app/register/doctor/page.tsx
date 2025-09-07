@@ -107,9 +107,12 @@ export default function DoctorRegistrationPage() {
     }
   }
 
+  useEffect(() => {
+    generateRecaptcha();
+  }, []);
+
   const handleSendOtp = (phoneNumber: string) => {
     setIsLoading(true);
-    generateRecaptcha();
     let appVerifier = window.recaptchaVerifier;
     signInWithPhoneNumber(auth, `+91${phoneNumber}`, appVerifier)
       .then(confirmationResult => {
@@ -326,4 +329,3 @@ export default function DoctorRegistrationPage() {
     </>
   );
 }
-
