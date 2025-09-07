@@ -68,16 +68,15 @@ export default function PharmacyRegistrationPage() {
     },
   });
 
-  const generateRecaptcha = () => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': (response: any) => {}
-      });
-    }
-  }
-
   useEffect(() => {
+    const generateRecaptcha = () => {
+        if (!window.recaptchaVerifier) {
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                'size': 'invisible',
+                'callback': (response: any) => {}
+            });
+        }
+    }
     generateRecaptcha();
   }, []);
 
