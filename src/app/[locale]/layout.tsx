@@ -21,7 +21,6 @@ export default function LocaleLayout({
         </div>
         <SosButton />
         <Toaster />
-        <div id="recaptcha-container"></div>
     </AuthProvider>
   );
 }

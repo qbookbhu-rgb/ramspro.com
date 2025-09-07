@@ -77,6 +77,13 @@ export default function PatientRegistrationPage() {
   useEffect(() => {
     const generateRecaptcha = () => {
         if (!window.recaptchaVerifier) {
+            // Ensure the container exists
+            if (!document.getElementById('recaptcha-container')) {
+              const container = document.createElement('div');
+              container.id = 'recaptcha-container';
+              document.body.appendChild(container);
+            }
+            
             window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
                 'size': 'invisible',
                 'callback': (response: any) => {
@@ -297,31 +304,33 @@ export default function PatientRegistrationPage() {
         </CardContent>
       </Card>
     </div>
-    {showOtpDialog && <Dialog open={showOtpDialog} onOpenChange={setShowOtpDialog}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Enter OTP</DialogTitle>
-          <DialogDescription>
-            We've sent a 6-digit OTP to your mobile number. Please enter it below.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex flex-col items-center gap-4">
-          <InputOTP maxLength={6} value={otp} onChange={setOtp}>
-            <InputOTPGroup>
-              <InputOTPSlot index={0} />
-              <InputOTPSlot index={1} />
-              <InputOTPSlot index={2} />
-              <InputOTPSlot index={3} />
-              <InputOTPSlot index={4} />
-              <InputOTPSlot index={5} />
-            </InputOTPGroup>
-          </InputOTP>
-          <Button onClick={handleOtpSubmit} disabled={isLoading || otp.length < 6} className="w-full">
-             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Verify & Register'}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>}
+    {showOtpDialog && (
+      <Dialog open={showOtpDialog} onOpenChange={setShowOtpDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enter OTP</DialogTitle>
+            <DialogDescription>
+              We've sent a 6-digit OTP to your mobile number. Please enter it below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4">
+            <InputOTP maxLength={6} value={otp} onChange={setOtp}>
+              <InputOTPGroup>
+                <InputOTPSlot index={0} />
+                <InputOTPSlot index={1} />
+                <InputOTPSlot index={2} />
+                <InputOTPSlot index={3} />
+                <InputOTPSlot index={4} />
+                <InputOTPSlot index={5} />
+              </InputOTPGroup>
+            </InputOTP>
+            <Button onClick={handleOtpSubmit} disabled={isLoading || otp.length < 6} className="w-full">
+              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Verify & Register'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    )}
     </>
   );
 }

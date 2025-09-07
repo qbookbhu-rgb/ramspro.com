@@ -71,6 +71,11 @@ export default function PharmacyRegistrationPage() {
   useEffect(() => {
     const generateRecaptcha = () => {
         if (!window.recaptchaVerifier) {
+            if (!document.getElementById('recaptcha-container')) {
+              const container = document.createElement('div');
+              container.id = 'recaptcha-container';
+              document.body.appendChild(container);
+            }
             window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
                 'size': 'invisible',
                 'callback': (response: any) => {}
