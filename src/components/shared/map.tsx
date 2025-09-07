@@ -64,3 +64,4 @@ const MapWrapper: React.FC<MapProps> = (props) => {
 }
 
 export { MapWrapper as Map };
+
