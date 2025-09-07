@@ -26,6 +26,11 @@ export default function Header() {
   const { user, signOut, loading, userRole } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
   
   const navLinks = [
     { href: "/#find-a-doctor", label: "Find a Doctor" },
@@ -82,7 +87,7 @@ export default function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {loading ? null : user ? (
+          {isClient && (loading ? null : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -147,7 +152,7 @@ export default function Header() {
               </Button>
               <Button variant="ghost" className="hidden sm:inline-flex" onClick={() => setIsLoginOpen(true)}>Login</Button>
             </>
-          )}
+          ))}
 
 
           <Button
