@@ -243,7 +243,7 @@ export default function DoctorRegistrationPage() {
                         <FormItem><FormLabel>Qualification</FormLabel><FormControl><Input placeholder="e.g., MBBS, MD" {...field} /></FormControl><FormMessage /></FormItem>
                     )}/>
                     <FormField name="registrationNumber" control={form.control} render={({ field }) => (
-                        <FormItem><FormLabel>Medical Registration No.</FormLabel><FormControl><Input placeholder="e.g., MCI12345" {...field} /></FormControl><FormMessage /></FormMessage>
+                        <FormItem><FormLabel>Medical Registration No.</FormLabel><FormControl><Input placeholder="e.g., MCI12345" {...field} /></FormControl><FormMessage /></FormItem>
                     )}/>
                     <FormField name="experience" control={form.control} render={({ field }) => (
                         <FormItem><FormLabel>Years of Experience</FormLabel><FormControl><Input type="number" placeholder="e.g., 10" {...field} /></FormControl><FormMessage /></FormItem>

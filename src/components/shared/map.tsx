@@ -8,9 +8,10 @@ import { Loader2 } from "lucide-react";
 interface MapProps extends google.maps.MapOptions {
   className?: string;
   style?: { [key: string]: string };
+  children?: React.ReactNode;
 }
 
-export const Map: React.FC<MapProps> = ({
+const MapComponent: React.FC<MapProps> = ({
   className,
   style,
   children,
@@ -57,10 +58,9 @@ const render = (status: Status) => {
 const MapWrapper: React.FC<MapProps> = (props) => {
     return (
         <Wrapper apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!} render={render}>
-            <Map {...props} />
+            <MapComponent {...props} />
         </Wrapper>
     )
 }
 
 export { MapWrapper as Map };
-

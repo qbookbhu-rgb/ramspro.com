@@ -215,7 +215,7 @@ export default function BookAppointmentPage({ params }: { params: { doctorId: st
                         <CardHeader>
                             <CardTitle className="font-headline text-3xl">Book Appointment</CardTitle>
                             <CardDescription>Select a date and time that works for you.</CardDescription>
-                        </Header>
+                        </CardHeader>
                         <CardContent className="space-y-8">
                             <div>
                                 <h3 className="font-bold mb-4 flex items-center"><CalendarIcon className="mr-2"/>Select Date</h3>
