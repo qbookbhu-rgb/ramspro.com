@@ -76,6 +76,11 @@ export default function DoctorRegistrationPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showOtpDialog, setShowOtpDialog] = useState(false);
   const [otp, setOtp] = useState("");
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -97,6 +102,7 @@ export default function DoctorRegistrationPage() {
   const profileType = form.watch("profileType");
 
   useEffect(() => {
+    if (!isClient) return;
     const generateRecaptcha = () => {
         if (!window.recaptchaVerifier) {
             if (!document.getElementById('recaptcha-container')) {
@@ -106,14 +112,12 @@ export default function DoctorRegistrationPage() {
             }
             window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
                 'size': 'invisible',
-                'callback': (response: any) => {
-                // reCAPTCHA solved, allow signInWithPhoneNumber.
-                }
+                'callback': (response: any) => {}
             });
         }
     }
     generateRecaptcha();
-  }, []);
+  }, [isClient]);
 
   const handleSendOtp = (phoneNumber: string) => {
     setIsLoading(true);
@@ -180,9 +184,11 @@ export default function DoctorRegistrationPage() {
     });
   }
 
+    if (!isClient) {
+        return <div className="container py-10 flex justify-center"><Loader2 className="h-16 w-16 animate-spin text-primary" /></div>;
+    }
 
   return (
-    <>
     <div className="container py-20 flex justify-center">
       <Card className="w-full max-w-3xl shadow-xl">
         <CardHeader>
@@ -304,34 +310,33 @@ export default function DoctorRegistrationPage() {
           </Form>
         </CardContent>
       </Card>
-    </div>
-    {showOtpDialog && (
+      {showOtpDialog && (
         <Dialog open={showOtpDialog} onOpenChange={setShowOtpDialog}>
-        <DialogContent>
-            <DialogHeader>
-            <DialogTitle>Enter OTP</DialogTitle>
-            <DialogDescription>
-                We've sent a 6-digit OTP to your mobile number. Please enter it below to complete registration.
-            </DialogDescription>
-            </DialogHeader>
-            <div className="flex flex-col items-center gap-4">
-            <InputOTP maxLength={6} value={otp} onChange={setOtp}>
-                <InputOTPGroup>
-                <InputOTPSlot index={0} />
-                <InputOTPSlot index={1} />
-                <InputOTPSlot index={2} />
-                <InputOTPSlot index={3} />
-                <InputOTPSlot index={4} />
-                <InputOTPSlot index={5} />
-                </InputOTPGroup>
-            </InputOTP>
-            <Button onClick={handleOtpSubmit} disabled={isLoading || otp.length < 6} className="w-full">
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Verify & Complete Registration'}
-            </Button>
-            </div>
-        </DialogContent>
+            <DialogContent>
+                <DialogHeader>
+                <DialogTitle>Enter OTP</DialogTitle>
+                <DialogDescription>
+                    We've sent a 6-digit OTP to your mobile number. Please enter it below to complete registration.
+                </DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-col items-center gap-4">
+                <InputOTP maxLength={6} value={otp} onChange={setOtp}>
+                    <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                    </InputOTPGroup>
+                </InputOTP>
+                <Button onClick={handleOtpSubmit} disabled={isLoading || otp.length < 6} className="w-full">
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Verify & Complete Registration'}
+                </Button>
+                </div>
+            </DialogContent>
         </Dialog>
-    )}
-    </>
+      )}
+    </div>
   );
 }
