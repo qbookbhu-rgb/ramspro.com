@@ -1,7 +1,6 @@
 
 import type { Metadata } from 'next';
-import {NextIntlClientProvider} from 'next-intl';
-import {getMessages} from 'next-intl/server';
+import {NextIntlClientProvider, useMessages} from 'next-intl';
 import '../globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
@@ -15,14 +14,14 @@ export const metadata: Metadata = {
   description: 'Find doctors, check symptoms with AI, and book appointments online or in-clinic.',
 };
 
-export default async function LocaleLayout({
+export default function LocaleLayout({
   children,
   params: {locale}
 }: {
   children: React.ReactNode;
   params: {locale: string};
 }) {
-  const messages = await getMessages({locale});
+  const messages = useMessages();
 
   return (
     <html lang={locale} suppressHydrationWarning>
