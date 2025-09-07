@@ -21,7 +21,7 @@ interface PatientData {
   patientId: string;
   gender: string;
   age: number;
-  bloodGroup: string; // Assuming blood group might be added later
+  bloodGroup: string;
 }
 
 export default function PatientDashboardPage() {
@@ -147,5 +147,3 @@ export default function PatientDashboardPage() {
     </div>
   );
 }
-
-    
