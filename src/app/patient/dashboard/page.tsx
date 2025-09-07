@@ -66,19 +66,10 @@ export default function PatientDashboardPage() {
     fetchPatientData();
   }, [user, authLoading, router]);
 
-  if (loading || authLoading) {
+  if (loading || authLoading || !patientData) {
     return (
       <div className="container py-10 flex justify-center items-center h-[60vh]">
         <Loader2 className="h-16 w-16 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!patientData) {
-    return (
-      <div className="container py-10 text-center">
-        <h1 className="text-2xl font-bold">Could not load patient data.</h1>
-        <p className="text-muted-foreground">Please try again later or contact support.</p>
       </div>
     );
   }
