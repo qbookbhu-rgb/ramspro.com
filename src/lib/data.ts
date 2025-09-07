@@ -1,4 +1,3 @@
-
 import type { SVGProps } from 'react';
 import { Stethoscope, HeartPulse, Brain, Bone, Baby, Eye, Search, Calendar, MessageSquare, HeartHandshake, Dumbbell, Smile, Grape, Siren, Video, Phone, Hospital, User, Pill, FlaskConical, Ambulance, Sparkles, Briefcase, Building, Ear, Shield, Leaf, Beaker } from 'lucide-react';
 
@@ -74,6 +73,8 @@ export const languages = [
     { code: 'bn', name: 'বাংলা' },
     { code: 'te', name: 'తెలుగు' },
 ];
+
+export const locales = ['en', 'hi', 'bn', 'te'];
 
 export const registrationRoles = [
     { name: 'Patient', href: '/register/patient', icon: User, description: 'Book appointments and manage your health.', disabled: false },
