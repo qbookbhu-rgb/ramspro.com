@@ -254,7 +254,7 @@ export default function PharmacyRegistrationPage() {
         </CardContent>
       </Card>
     </div>
-    <Dialog open={showOtpDialog} onOpenChange={setShowOtpDialog}>
+    {showOtpDialog && <Dialog open={showOtpDialog} onOpenChange={setShowOtpDialog}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Enter OTP</DialogTitle>
@@ -278,7 +278,7 @@ export default function PharmacyRegistrationPage() {
           </Button>
         </div>
       </DialogContent>
-    </Dialog>
+    </Dialog>}
     </>
   );
 }
