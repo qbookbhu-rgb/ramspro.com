@@ -1,35 +1,32 @@
 
 import { Search, Calendar, MessageSquare } from "lucide-react";
-import { getTranslations } from "next-intl/server";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default async function HowItWorksSection() {
-  const t = await getTranslations('HowItWorks');
+export default function HowItWorksSection() {
 
   const steps = [
     {
       icon: Search,
-      title: t('step1Title'),
-      description: t('step1Description'),
+      title: "Find Your Doctor",
+      description: "Search by specialty or symptoms to find the right doctor for you.",
     },
     {
       icon: Calendar,
-      title: t('step2Title'),
-      description: t('step2Description'),
+      title: "Book an Appointment",
+      description: "Choose a convenient time and book a video, audio, or in-clinic visit.",
     },
     {
       icon: MessageSquare,
-      title: t('step3Title'),
-      description: t('step3Description'),
+      title: "Consult Online",
+      description: "Connect with your doctor from the comfort of your home.",
     },
   ];
 
   return (
     <section className="container text-center">
-      <h2 className="text-3xl md:text-4xl font-bold font-headline">{t('title')}</h2>
+      <h2 className="text-3xl md:text-4xl font-bold font-headline">How It Works</h2>
       <p className="mt-2 text-muted-foreground md:text-lg max-w-2xl mx-auto">
-        {t('subtitle')}
+        Get expert medical care in three simple steps.
       </p>
       <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
         {steps.map((step, index) => (

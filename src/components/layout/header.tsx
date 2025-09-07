@@ -5,8 +5,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Languages, Menu, UserCircle, X, LogOut, Briefcase, Ambulance, Beaker, Pill } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { usePathname, useRouter } from 'next-intl/navigation';
-import { useTranslations } from 'next-intl';
+import { usePathname, useRouter } from 'next/navigation';
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -20,26 +19,22 @@ import {
 import { languages } from "@/lib/data";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { LoginDialog } from "./login-dialog";
-import { getUserRole } from "@/app/actions";
-import { useLocale } from "next-intl";
 
 export default function Header() {
-  const t = useTranslations('Header');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const { user, signOut, loading, userRole } = useAuth();
-  const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
   
   const navLinks = [
-    { href: "/#find-a-doctor", label: t('findDoctor') },
-    { href: "/#wellness", label: t('wellness') },
-    { href: "/register/doctor", label: t('forDoctors') },
+    { href: "/#find-a-doctor", label: "Find a Doctor" },
+    { href: "/#wellness", label: "Wellness" },
+    { href: "/register/doctor", label: "For Doctors" },
   ];
 
   const handleLocaleChange = (newLocale: string) => {
-    router.push(pathname, {locale: newLocale});
+    // router.push(pathname, {locale: newLocale});
   };
   
   const getInitials = (name?: string | null) => {

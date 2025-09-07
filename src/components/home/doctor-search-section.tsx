@@ -13,7 +13,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { useTranslations } from "next-intl";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DoctorMapView from "./doctor-map-view";
 
@@ -31,7 +30,6 @@ interface Doctor {
 }
 
 export default function DoctorSearchSection() {
-  const t = useTranslations('DoctorSearch');
   const [allDoctors, setAllDoctors] = useState<Doctor[]>([]);
   const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -101,9 +99,9 @@ export default function DoctorSearchSection() {
   return (
     <section id="find-a-doctor" className="container">
       <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold font-headline">{t('title')}</h2>
+        <h2 className="text-3xl md:text-4xl font-bold font-headline">Find a Doctor</h2>
         <p className="mt-2 text-muted-foreground md:text-lg max-w-2xl mx-auto">
-          {t('subtitle')}
+          Search for doctors by specialty, location, or consultation type.
         </p>
       </div>
 
@@ -113,7 +111,7 @@ export default function DoctorSearchSection() {
             <div className="relative lg:col-span-2">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input 
-                placeholder={t('searchPlaceholder')}
+                placeholder="Doctor name or specialty..."
                 className="pl-10" 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -122,7 +120,7 @@ export default function DoctorSearchSection() {
             <div className="relative">
               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input 
-                placeholder={t('locationPlaceholder')}
+                placeholder="Location"
                 className="pl-10" 
                 value={locationQuery}
                 onChange={(e) => setLocationQuery(e.target.value)}
@@ -130,7 +128,7 @@ export default function DoctorSearchSection() {
             </div>
             <Select onValueChange={setSpecialtyQuery} value={specialtyQuery}>
               <SelectTrigger>
-                <SelectValue placeholder={t('specialtyPlaceholder')} />
+                <SelectValue placeholder="Filter by Specialty" />
               </SelectTrigger>
               <SelectContent>
                  <SelectItem value="All Specialties">All Specialties</SelectItem>
