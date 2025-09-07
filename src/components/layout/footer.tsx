@@ -10,7 +10,7 @@ const socialLinks = [
   { icon: Linkedin, href: "#" },
 ];
 
-export default async function Footer() {
+export default function Footer() {
 
   const footerLinks = [
     { title: "Company", links: ["About Us", "Careers", "Press", "For Doctors"] },

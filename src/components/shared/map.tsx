@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { Children, isValidElement, useEffect, useRef, useState } from "react";
@@ -55,13 +54,10 @@ const render = (status: Status) => {
     }
 };
 
-const MapWrapper: React.FC<MapProps> = (props) => {
+export const Map: React.FC<MapProps> = (props) => {
     return (
         <Wrapper apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!} render={render}>
             <MapComponent {...props} />
         </Wrapper>
     )
 }
-
-export { MapWrapper as Map };
-
