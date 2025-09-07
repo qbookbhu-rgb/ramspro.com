@@ -1,6 +1,6 @@
 
 import type { Metadata } from 'next';
-import {NextIntlClientProvider} from 'next-intl';
+import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import '../globals.css';
 import { cn } from '@/lib/utils';
@@ -22,7 +22,7 @@ export default async function LocaleLayout({
   children: React.ReactNode;
   params: {locale: string};
 }) {
-  const messages = await getMessages({locale});
+  const messages = await getMessages();
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -33,16 +33,16 @@ export default async function LocaleLayout({
       </head>
       <body className={cn('min-h-screen bg-background font-body antialiased')}>
         <NextIntlClientProvider locale={locale} messages={messages}>
-            <AuthProvider>
-            <div className="relative flex min-h-dvh flex-col bg-background">
-                <Header />
-                <main className="flex-1">{children}</main>
-                <Footer />
-            </div>
-            <SosButton />
-            <Toaster />
-            <div id="recaptcha-container"></div>
-            </AuthProvider>
+          <AuthProvider>
+          <div className="relative flex min-h-dvh flex-col bg-background">
+              <Header />
+              <main className="flex-1">{children}</main>
+              <Footer />
+          </div>
+          <SosButton />
+          <Toaster />
+          <div id="recaptcha-container"></div>
+          </AuthProvider>
         </NextIntlClientProvider>
       </body>
     </html>
