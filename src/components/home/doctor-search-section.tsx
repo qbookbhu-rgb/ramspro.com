@@ -29,6 +29,12 @@ interface Doctor {
     dataAiHint: string;
 }
 
+// Simple pseudo-random number generator based on a seed
+const seededRandom = (seed: number) => {
+    let x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+};
+
 export default function DoctorSearchSection() {
   const [allDoctors, setAllDoctors] = useState<Doctor[]>([]);
   const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([]);
@@ -45,8 +51,10 @@ export default function DoctorSearchSection() {
         try {
             const doctorsCollection = collection(db, 'doctors');
             const doctorSnapshot = await getDocs(doctorsCollection);
-            const doctorsList: Doctor[] = doctorSnapshot.docs.map((doc, index) => {
+            const doctorsList: Doctor[] = doctorSnapshot.docs.map((doc) => {
                 const data = doc.data();
+                // Use the document ID to create a consistent seed for "random" data
+                const seed = doc.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
                 return {
                     uid: doc.id,
                     name: data.name,
@@ -54,9 +62,9 @@ export default function DoctorSearchSection() {
                     city: data.city || 'Unknown Location',
                     experience: data.experience,
                     consultationFee: data.consultationFee,
-                    image: `https://picsum.photos/200/200?random=${index + 1}`,
-                    rating: 4.5 + (Math.random() * 0.5),
-                    reviews: Math.floor(Math.random() * 200) + 50,
+                    image: `https://picsum.photos/200/200?random=${doc.id}`, // Use ID for consistent image
+                    rating: 4.5 + (seededRandom(seed) * 0.5),
+                    reviews: Math.floor(seededRandom(seed + 1) * 200) + 50,
                     dataAiHint: 'doctor portrait'
                 };
             });
